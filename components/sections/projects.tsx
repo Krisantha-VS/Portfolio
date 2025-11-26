@@ -1,11 +1,20 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { projects } from "@/data/portfolio";
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink, Star, Filter } from "lucide-react";
 
 export function Projects() {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const categories = ["All", ...Array.from(new Set(projects.map(p => p.category)))];
+
+  const filteredProjects = selectedCategory === "All"
+    ? projects
+    : projects.filter(p => p.category === selectedCategory);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -40,19 +49,37 @@ export function Projects() {
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             Featured <span className="gradient-text">Projects</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             Enterprise solutions and full-stack applications that drive business value
           </p>
+
+          {/* Category Filter */}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+                className={selectedCategory === category ? "shadow-lg" : ""}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
-        >
-          {projects.map((project, index) => (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedCategory}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          >
+            {filteredProjects.map((project, index) => (
             <motion.div
               key={index}
               variants={itemVariants}
@@ -60,6 +87,13 @@ export function Projects() {
               className="group"
             >
               <Card className="h-full overflow-hidden hover:shadow-2xl transition-all duration-300 relative">
+                {/* Category Badge */}
+                <div className="absolute top-4 right-4 z-20">
+                  <span className="px-3 py-1 text-xs font-medium bg-primary/90 text-primary-foreground rounded-full shadow-lg">
+                    {project.category}
+                  </span>
+                </div>
+
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -120,7 +154,8 @@ export function Projects() {
               </Card>
             </motion.div>
           ))}
-        </motion.div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Additional Info */}
         <motion.div

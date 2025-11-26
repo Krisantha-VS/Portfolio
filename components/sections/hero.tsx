@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { TypeAnimation } from "react-type-animation";
 import { Button } from "@/components/ui/button";
 import { Github, Linkedin, Mail, MapPin, Phone, Download, ArrowDown } from "lucide-react";
 import { personalInfo, highlights } from "@/data/portfolio";
@@ -72,12 +73,28 @@ export function Hero() {
             {personalInfo.name}
           </motion.h1>
 
-          {/* Title */}
+          {/* Title with Typing Animation */}
           <motion.h2
             variants={itemVariants}
-            className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 text-foreground"
+            className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 text-foreground min-h-[3rem]"
           >
-            {personalInfo.title}
+            <TypeAnimation
+              sequence={[
+                "Full Stack Engineer",
+                2000,
+                "Enterprise Developer",
+                2000,
+                "SAP Integration Expert",
+                2000,
+                "Blazor Specialist",
+                2000,
+                ".NET Architect",
+                2000,
+              ]}
+              wrapper="span"
+              speed={50}
+              repeat={Infinity}
+            />
           </motion.h2>
 
           {/* Subtitle */}
