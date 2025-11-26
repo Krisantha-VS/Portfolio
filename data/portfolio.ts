@@ -223,24 +223,28 @@ export const projects = [
     title: "Part Request Tool",
     description: "Globally used application integrated with SAP, automating multi-level approval workflows with complex cross-verification logic for warehouse operations",
     technologies: ["C#", "ASP.NET Core", "Blazor", "SAP Integration", ".NET 8"],
-    highlights: ["SAP Integration", "Multi-level Approval", "Global Deployment"]
+    highlights: ["SAP Integration", "Multi-level Approval", "Global Deployment"],
+    category: "Enterprise"
   },
   {
     title: "Logistics Tool Migration",
     description: "End-to-end migration from .NET 6 to .NET 8, improving performance and integrating logistics tracking with customer feedback workflows",
     technologies: ["C#", "ASP.NET Core", "Blazor", ".NET 8"],
-    highlights: ["Performance Improvement", "Framework Migration", "Enhanced Integration"]
+    highlights: ["Performance Improvement", "Framework Migration", "Enhanced Integration"],
+    category: "Migration"
   },
   {
     title: "CutList System",
     description: "Time tracking and efficiency analysis system with material sorting capabilities for manufacturing operations",
     technologies: ["C#", "ASP.NET Core", "Blazor", "MudBlazor"],
-    highlights: ["Time Tracking", "Efficiency Analysis", "Material Management"]
+    highlights: ["Time Tracking", "Efficiency Analysis", "Material Management"],
+    category: "Web App"
   },
   {
     title: "Royalda Apps Center",
     description: "Classified platform with integrated payment systems, serving as marketplace for applications and services",
     technologies: ["PHP", "JavaScript", "MySQL", "Payment Gateway Integration"],
-    highlights: ["Payment Integration", "Marketplace Platform", "Full Stack Development"]
+    highlights: ["Payment Integration", "Marketplace Platform", "Full Stack Development"],
+    category: "E-commerce"
   }
 ];

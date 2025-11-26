@@ -10,20 +10,12 @@ import { ExternalLink, Star, Filter } from "lucide-react";
 const categories = ["All", "Enterprise", "Migration", "Web App", "E-commerce"] as const;
 type Category = typeof categories[number];
 
-// Map project titles to categories
-const projectCategories: Record<string, Category> = {
-  "Part Request Tool": "Enterprise",
-  "Logistics Tool Migration": "Migration",
-  "CutList System": "Web App",
-  "Royalda Apps Center": "E-commerce",
-};
-
 export function Projects() {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
 
   const filteredProjects = activeCategory === "All" 
     ? projects 
-    : projects.filter(project => projectCategories[project.title] === activeCategory);
+    : projects.filter(project => project.category === activeCategory);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -116,9 +108,11 @@ export function Projects() {
                           {project.title}
                         </CardTitle>
                         {/* Category Badge */}
-                        <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary border border-primary/20">
-                          {projectCategories[project.title]}
-                        </span>
+                        {project.category && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary border border-primary/20">
+                            {project.category}
+                          </span>
+                        )}
                       </div>
                       <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                     </div>
