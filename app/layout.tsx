@@ -58,10 +58,13 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.svg', type: 'image/svg+xml' }
+    ],
   },
-  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
