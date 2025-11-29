@@ -29,6 +29,11 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    
+    /* Light mode mesh gradient colors */
+    --mesh-orb-1: 165 100% 78%;
+    --mesh-orb-2: 249 100% 82%;
+    --mesh-orb-3: 328 100% 85%;
   }
 
   .dark {
@@ -56,6 +61,11 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    
+    /* Dark mode mesh gradient colors */
+    --mesh-orb-1: 218 91% 60%;
+    --mesh-orb-2: 330 81% 60%;
+    --mesh-orb-3: 186 94% 43%;
   }
 }
 
@@ -64,8 +74,45 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background: #fafafa;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  .dark body {
+    background: #0a0a0f;
+  }
+  
+  /* Premium Mesh Gradient Background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    pointer-events: none;
+  }
+  
+  /* Noise texture overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+  
+  .dark body::after {
+    opacity: 0.04;
   }
 }
 
@@ -130,3 +177,168 @@ html {
     linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
   background-size: 40px 40px;
 }
+
+/* Mesh Gradient Orbs */
+.mesh-gradient {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mesh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  will-change: transform;
+}
+
+/* Light mode orbs */
+.mesh-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: hsl(var(--mesh-orb-1) / 0.25);
+  top: -10%;
+  right: -10%;
+  animation: float-1 18s ease-in-out infinite;
+}
+
+.mesh-orb-2 {
+  width: 400px;
+  height: 400px;
+  background: hsl(var(--mesh-orb-2) / 0.25);
+  bottom: -5%;
+  left: -5%;
+  animation: float-2 20s ease-in-out infinite;
+}
+
+.mesh-orb-3 {
+  width: 450px;
+  height: 450px;
+  background: hsl(var(--mesh-orb-3) / 0.25);
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: float-3 16s ease-in-out infinite;
+}
+
+/* Dark mode orbs - stronger opacity */
+.dark .mesh-orb-1 {
+  background: hsl(var(--mesh-orb-1) / 0.35);
+  filter: blur(120px);
+}
+
+.dark .mesh-orb-2 {
+  background: hsl(var(--mesh-orb-2) / 0.35);
+  filter: blur(120px);
+}
+
+.dark .mesh-orb-3 {
+  background: hsl(var(--mesh-orb-3) / 0.35);
+  filter: blur(120px);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .mesh-orb-1 {
+    width: 300px;
+    height: 300px;
+    filter: blur(80px);
+  }
+  
+  .mesh-orb-2 {
+    width: 280px;
+    height: 280px;
+    filter: blur(80px);
+  }
+  
+  .mesh-orb-3 {
+    width: 320px;
+    height: 320px;
+    filter: blur(80px);
+  }
+  
+  .dark .mesh-orb-1,
+  .dark .mesh-orb-2,
+  .dark .mesh-orb-3 {
+    filter: blur(90px);
+  }
+}
+
+/* Floating animations */
+@keyframes float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 30px) scale(1.05);
+  }
+  66% {
+    transform: translate(30px, -20px) scale(0.95);
+  }
+}
+
+@keyframes float-3 {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  33% {
+    transform: translate(calc(-50% + 25px), calc(-50% - 25px)) scale(1.08);
+  }
+  66% {
+    transform: translate(calc(-50% - 25px), calc(-50% + 25px)) scale(0.92);
+  }
+}
+
+/* Premium button glow effects */
+.btn-glow {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, 
+    hsl(var(--mesh-orb-1) / 0.5), 
+    hsl(var(--mesh-orb-2) / 0.5)
+  );
+  filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.btn-glow:hover::before {
+  opacity: 0.6;
+}
+
+.dark .btn-glow::before {
+  background: linear-gradient(135deg, 
+    hsl(var(--mesh-orb-1) / 0.6), 
+    hsl(var(--mesh-orb-2) / 0.6)
+  );
+}
+
+.dark .btn-glow:hover::before {
+  opacity: 0.8;
+}
+
