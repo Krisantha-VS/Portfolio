@@ -104,7 +104,7 @@ export function Services() {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="group relative"
+                className="group relative flex"
               >
                 {service.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
@@ -114,7 +114,7 @@ export function Services() {
                     </span>
                   </div>
                 )}
-                <Card className={`h-full transition-all duration-300 ${
+                <Card className={`h-full w-full transition-all duration-300 flex flex-col ${
                   service.popular
                     ? "border-primary shadow-lg shadow-primary/20 scale-105"
                     : "hover:shadow-xl hover:scale-105"
@@ -131,9 +131,9 @@ export function Services() {
                       </div>
                     </div>
                     <CardTitle className="text-xl mb-2">{service.title}</CardTitle>
-                    <CardDescription>{service.description}</CardDescription>
+                    <CardDescription className="min-h-[3rem]">{service.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 flex-grow flex flex-col">
                     {/* Pricing */}
                     <div className="p-4 rounded-lg bg-accent space-y-2">
                       <div className="flex items-baseline gap-2">
@@ -152,7 +152,7 @@ export function Services() {
                     </div>
 
                     {/* Features */}
-                    <div>
+                    <div className="flex-grow">
                       <h5 className="text-sm font-semibold mb-3">What's Included:</h5>
                       <ul className="space-y-2">
                         {service.features.slice(0, 5).map((feature, featureIndex) => (
@@ -170,14 +170,16 @@ export function Services() {
                     </div>
 
                     {/* CTA */}
-                    <Button
-                      variant={service.popular ? "gradient" : "outline"}
-                      className="w-full"
-                      onClick={handleContact}
-                    >
-                      Get Started
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                    <div className="mt-auto pt-4">
+                      <Button
+                        variant={service.popular ? "gradient" : "outline"}
+                        className="w-full"
+                        onClick={handleContact}
+                      >
+                        Get Started
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>

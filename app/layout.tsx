@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { MeshGradient } from "@/components/mesh-gradient";
 
 export const metadata: Metadata = {
   title: "Krisantha Sarma | Full Stack Engineer",
@@ -76,6 +77,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen antialiased font-sans">
         <ThemeProvider defaultTheme="dark" storageKey="portfolio-theme">
+          <MeshGradient />
           {children}
         </ThemeProvider>
       </body>

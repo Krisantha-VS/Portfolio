@@ -39,19 +39,12 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 pt-20 md:pt-24"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-24"
     >
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-500" />
-      </div>
-
       {/* Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pb-20">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -184,7 +177,7 @@ export function Hero() {
           {/* Social Links */}
           <motion.div
             variants={itemVariants}
-            className="flex items-center justify-center gap-4"
+            className="flex items-center justify-center gap-4 mb-16"
           >
             <motion.a
               href={personalInfo.social.github}
@@ -218,9 +211,9 @@ export function Hero() {
               repeat: Infinity,
               repeatType: "reverse",
             }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2"
+            className="mt-8"
           >
-            <ArrowDown className="w-6 h-6 text-muted-foreground" />
+            <ArrowDown className="w-6 h-6 text-muted-foreground mx-auto" />
           </motion.div>
         </motion.div>
       </div>
