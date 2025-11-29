@@ -266,8 +266,8 @@ export const services = [
       "Comprehensive documentation"
     ],
     pricing: {
-      hourly: "$95/hr",
-      project: "Starting at $5,000",
+      hourly: "$45-55/hr",
+      project: "Starting at $2,500-3,500",
       description: "Complex enterprise solutions with multiple integrations"
     },
     delivery: "2-12 weeks",
@@ -288,8 +288,8 @@ export const services = [
       "Technical documentation"
     ],
     pricing: {
-      hourly: "$120/hr",
-      project: "Starting at $8,000",
+      hourly: "$55-70/hr",
+      project: "Starting at $4,000-5,500",
       description: "Enterprise SAP integration projects"
     },
     delivery: "3-8 weeks",
@@ -310,8 +310,8 @@ export const services = [
       "Post-migration support"
     ],
     pricing: {
-      hourly: "$100/hr",
-      project: "Starting at $6,500",
+      hourly: "$50-60/hr",
+      project: "Starting at $3,500-4,500",
       description: "Full migration with testing and optimization"
     },
     delivery: "4-10 weeks",
@@ -332,8 +332,8 @@ export const services = [
       "Performance optimization"
     ],
     pricing: {
-      hourly: "$90/hr",
-      project: "Starting at $4,000",
+      hourly: "$40-50/hr",
+      project: "Starting at $2,000-2,800",
       description: "Modern Blazor applications"
     },
     delivery: "2-8 weeks",
@@ -354,8 +354,8 @@ export const services = [
       "API versioning strategy"
     ],
     pricing: {
-      hourly: "$85/hr",
-      project: "Starting at $3,500",
+      hourly: "$35-45/hr",
+      project: "Starting at $1,500-2,500",
       description: "Complete API solutions"
     },
     delivery: "1-6 weeks",
@@ -376,8 +376,8 @@ export const services = [
       "Implementation guidance"
     ],
     pricing: {
-      hourly: "$110/hr",
-      project: "Starting at $2,500",
+      hourly: "$50-65/hr",
+      project: "Starting at $800-1,500",
       description: "In-depth code analysis and optimization"
     },
     delivery: "1-3 weeks",
@@ -398,8 +398,8 @@ export const services = [
       "Documentation review"
     ],
     pricing: {
-      hourly: "$100/hr",
-      project: "Monthly retainer from $3,000",
+      hourly: "$55-70/hr",
+      project: "Monthly retainer from $1,500-2,000",
       description: "Ongoing technical leadership"
     },
     delivery: "Ongoing",
@@ -420,8 +420,8 @@ export const services = [
       "Notification systems"
     ],
     pricing: {
-      hourly: "$80/hr",
-      project: "Starting at $2,000",
+      hourly: "$35-45/hr",
+      project: "Starting at $1,000-1,500",
       description: "Business process automation"
     },
     delivery: "1-4 weeks",

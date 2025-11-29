@@ -60,8 +60,8 @@ export function Navigation() {
       animate={{ y: 0 }}
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        isScrolled
-          ? "bg-background/80 backdrop-blur-lg border-b border-border shadow-lg"
+        isScrolled || isMobileMenuOpen
+          ? "bg-background/95 backdrop-blur-lg border-b border-border shadow-lg"
           : "bg-transparent"
       )}
     >
@@ -148,29 +148,25 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="md:hidden overflow-hidden"
+              className="md:hidden overflow-hidden bg-background border-t border-border"
             >
-              <div className="py-4 space-y-2">
+              <div className="py-4 space-y-2 bg-background">
                 {navItems.map((item, index) => (
-                  <motion.a
+                  <motion.button
                     key={item.name}
-                    href={item.href}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick(item.href);
-                    }}
+                    onClick={() => handleNavClick(item.href)}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
                     className={cn(
-                      "block px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer",
+                      "w-full text-left block px-4 py-3 text-base font-medium rounded-lg transition-colors cursor-pointer",
                       activeSection === item.href.substring(1)
                         ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        : "text-foreground hover:bg-accent hover:text-accent-foreground"
                     )}
                   >
                     {item.name}
-                  </motion.a>
+                  </motion.button>
                 ))}
               </div>
             </motion.div>

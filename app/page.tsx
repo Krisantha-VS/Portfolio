@@ -7,7 +7,6 @@ import { Process } from "@/components/sections/process";
 import { Experience } from "@/components/sections/experience";
 import { Achievements } from "@/components/sections/achievements";
 import { Projects } from "@/components/sections/projects";
-import { Testimonials } from "@/components/sections/testimonials";
 import { FAQ } from "@/components/sections/faq";
 import { Contact } from "@/components/sections/contact";
 import { Footer } from "@/components/footer";
@@ -29,7 +28,6 @@ export default function Home() {
         <Experience />
         <Achievements />
         <Projects />
-        <Testimonials />
         <FAQ />
         <Contact />
         <Footer />
