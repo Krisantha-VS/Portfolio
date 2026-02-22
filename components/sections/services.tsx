@@ -14,6 +14,8 @@ import {
   Users,
   Workflow,
   Check,
+  Clock,
+  Star,
   ArrowRight
 } from "lucide-react";
 
@@ -51,7 +53,10 @@ export function Services() {
   };
 
   const handleContact = () => {
-    document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
+    const element = document.querySelector("#contact");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -65,19 +70,19 @@ export function Services() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-            What I <span className="gradient-text">Deliver</span>
+            Services & <span className="gradient-text">Pricing</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
-            Enterprise-grade development across the full stack — from architecture to deployment
+            Premium development services backed by enterprise experience and proven results
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-green-500" />
-              <span>Clean, maintainable code</span>
+              <span>100% satisfaction guarantee</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-green-500" />
-              <span>Full documentation</span>
+              <span>30-90 day warranty</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-green-500" />
@@ -101,7 +106,19 @@ export function Services() {
                 variants={itemVariants}
                 className="group relative flex"
               >
-                <Card className="h-full w-full transition-all duration-300 flex flex-col hover:shadow-xl hover:scale-[1.02] hover:border-primary/40">
+                {service.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <span className="flex items-center gap-1 px-3 py-1 text-xs font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full shadow-lg">
+                      <Star className="w-3 h-3 fill-white" />
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                <Card className={`h-full w-full transition-all duration-300 flex flex-col ${
+                  service.popular
+                    ? "border-primary shadow-lg shadow-primary/20 scale-105"
+                    : "hover:shadow-xl hover:scale-105"
+                }`}>
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2">
                       <div className={`p-3 rounded-lg bg-gradient-to-r ${
@@ -117,9 +134,26 @@ export function Services() {
                     <CardDescription className="min-h-[3rem]">{service.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 flex-grow flex flex-col">
+                    {/* Pricing */}
+                    <div className="p-4 rounded-lg bg-accent space-y-2">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-bold gradient-text">
+                          {service.pricing.hourly}
+                        </span>
+                        <span className="text-sm text-muted-foreground">hourly</span>
+                      </div>
+                      <div className="text-sm font-medium">
+                        {service.pricing.project}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3" />
+                        <span>{service.delivery}</span>
+                      </div>
+                    </div>
+
                     {/* Features */}
                     <div className="flex-grow">
-                      <h5 className="text-sm font-semibold mb-3">What&apos;s Included:</h5>
+                      <h5 className="text-sm font-semibold mb-3">What's Included:</h5>
                       <ul className="space-y-2">
                         {service.features.slice(0, 5).map((feature, featureIndex) => (
                           <li key={featureIndex} className="flex items-start gap-2 text-sm">
@@ -129,7 +163,7 @@ export function Services() {
                         ))}
                         {service.features.length > 5 && (
                           <li className="text-xs text-muted-foreground pl-6">
-                            +{service.features.length - 5} more
+                            +{service.features.length - 5} more features
                           </li>
                         )}
                       </ul>
@@ -138,11 +172,11 @@ export function Services() {
                     {/* CTA */}
                     <div className="mt-auto pt-4">
                       <Button
-                        variant="outline"
+                        variant={service.popular ? "gradient" : "outline"}
                         className="w-full"
                         onClick={handleContact}
                       >
-                        Let&apos;s Talk
+                        Get Started
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </div>
@@ -153,7 +187,7 @@ export function Services() {
           })}
         </motion.div>
 
-        {/* Contact CTA */}
+        {/* Custom Pricing CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -164,16 +198,20 @@ export function Services() {
           <Card className="max-w-3xl mx-auto glass">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold mb-4">
-                Have a project in mind?
+                Need something custom?
               </h3>
               <p className="text-muted-foreground mb-6">
-                Whether it&apos;s a greenfield build, a legacy modernisation, or a complex enterprise integration —
-                I&apos;d love to hear about it.
+                Every project is unique. Let's discuss your specific requirements and create
+                a tailored solution that fits your needs and budget.
               </p>
-              <Button variant="gradient" size="lg" onClick={handleContact}>
-                Start a Conversation
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button variant="gradient" size="lg" onClick={handleContact}>
+                  Request Custom Quote
+                </Button>
+                <Button variant="outline" size="lg" onClick={handleContact}>
+                  Schedule Consultation
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </motion.div>

@@ -1,10 +1,23 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { outcomes } from "@/data/portfolio";
+import { Button } from "@/components/ui/button";
+import { testimonials } from "@/data/portfolio";
+import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
 
 export function Testimonials() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const next = () => {
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prev = () => {
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
   return (
     <section className="py-20 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,46 +29,134 @@ export function Testimonials() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-            Delivered <span className="gradient-text">Impact</span>
+            Client <span className="gradient-text">Testimonials</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Measurable outcomes from production systems in global manufacturing
+            Hear what my clients have to say about working with me
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {outcomes.map((outcome, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-              whileHover={{ y: -8 }}
-            >
-              <Card className="h-full overflow-hidden group hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-8 h-full flex flex-col">
-                  {/* Metric */}
-                  <div className="text-5xl sm:text-6xl font-bold gradient-text mb-2 leading-none">
-                    {outcome.metric}
-                  </div>
+        <div className="max-w-4xl mx-auto">
+          <div className="relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="overflow-hidden">
+                  <CardContent className="p-8 sm:p-12 relative">
+                    {/* Quote Icon */}
+                    <Quote className="absolute top-6 right-6 w-16 h-16 text-primary/10" />
 
-                  {/* Label */}
-                  <div className="text-lg font-semibold mb-4 text-foreground">
-                    {outcome.label}
-                  </div>
+                    {/* Avatar */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                        {testimonials[currentIndex].avatar}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg">
+                          {testimonials[currentIndex].name}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {testimonials[currentIndex].role}
+                        </p>
+                      </div>
+                    </div>
 
-                  {/* Divider */}
-                  <div className="w-12 h-0.5 bg-primary/30 mb-4 group-hover:w-full transition-all duration-500" />
+                    {/* Rating */}
+                    <div className="flex gap-1 mb-4">
+                      {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                      ))}
+                    </div>
 
-                  {/* Detail */}
-                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-                    {outcome.detail}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                    {/* Content */}
+                    <p className="text-lg leading-relaxed mb-6 relative z-10">
+                      "{testimonials[currentIndex].content}"
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-center gap-4 mt-8">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={prev}
+                className="rounded-full"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+
+              <div className="flex gap-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === currentIndex
+                        ? "bg-primary w-8"
+                        : "bg-primary/30"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={next}
+                className="rounded-full"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Grid view for larger screens */}
+          <div className="hidden lg:grid grid-cols-2 gap-6 mt-12">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+                onClick={() => setCurrentIndex(index)}
+                className="cursor-pointer"
+              >
+                <Card className={`h-full transition-all ${
+                  index === currentIndex ? "border-primary shadow-lg" : ""
+                }`}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                        {testimonial.avatar}
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="font-semibold text-sm">{testimonial.name}</h5>
+                        <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      "{testimonial.content}"
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
