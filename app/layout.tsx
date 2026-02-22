@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { MeshGradient } from "@/components/mesh-gradient";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://krisantha-sarma.dev"),
@@ -52,7 +59,7 @@ export const metadata: Metadata = {
       "Full Stack Engineer with 8+ years experience. Specialist in C#, .NET 8, Blazor, and SAP integration. 15+ enterprise applications delivered. Open to remote work.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/og-image.svg",
         width: 1200,
         height: 630,
         alt: "Krisantha Sarma - Full Stack Engineer",
@@ -64,7 +71,7 @@ export const metadata: Metadata = {
     title: "Krisantha Sarma | Full Stack Engineer — C#, .NET 8, Blazor",
     description:
       "Full Stack Engineer with 8+ years experience. Specialist in C#, .NET 8, Blazor, and SAP integration. 15+ enterprise applications delivered. Open to remote work.",
-    images: ["/og-image.jpg"],
+    images: ["/og-image.svg"],
   },
   icons: {
     icon: [
@@ -83,7 +90,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen antialiased font-sans">
+      <body className={`min-h-screen antialiased ${inter.variable} font-sans`}>
         <ThemeProvider defaultTheme="dark" storageKey="portfolio-theme">
           <MeshGradient />
           {children}

@@ -143,57 +143,63 @@ export function Projects() {
                 <motion.div
                   key={`${project.category}-${project.title}`}
                   variants={itemVariants}
-                  whileHover={{ y: -6 }}
+                  whileHover={{ y: -8 }}
                   className="group"
                 >
-                  <Card className="h-full overflow-hidden hover:shadow-2xl transition-all duration-300 relative flex flex-col">
-                    {/* Hover gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  <Card className="h-full overflow-hidden glass border-white/10 dark:border-white/5 hover:border-primary/30 transition-all duration-500 relative flex flex-col rounded-[2rem] shadow-2xl hover:shadow-primary/20">
+                    {/* Hover gradient overlay (Enhanced) */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-                    <CardHeader className="relative z-10 pb-3">
+                    <CardHeader className="relative z-10 pb-4 pt-8 px-8">
                       {/* Category badge + period */}
-                      <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center justify-between gap-2 mb-4">
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border",
+                            "inline-flex items-center gap-1.5 px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full border",
                             config.badge
                           )}
                         >
-                          <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
+                          <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", config.dot)} />
                           {project.category}
                         </span>
-                        <span className="text-xs text-muted-foreground font-mono">
+                        <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-0.5 rounded-md">
                           {project.period}
                         </span>
                       </div>
 
-                      <CardTitle className="text-lg sm:text-xl leading-snug">
+                      <CardTitle className="text-xl sm:text-2xl leading-tight font-black tracking-tighter group-hover:gradient-text transition-all duration-300">
                         {project.title}
                       </CardTitle>
-                      <CardDescription className="text-sm leading-relaxed mt-1">
+                      <CardDescription className="text-sm leading-relaxed mt-2 text-muted-foreground/90 line-clamp-3">
                         {project.description}
                       </CardDescription>
                     </CardHeader>
 
-                    <CardContent className="relative z-10 flex flex-col gap-4 flex-1">
-                      {/* Impact metric */}
-                      <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                        <TrendingUp className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                        <p className="text-xs sm:text-sm font-medium text-primary leading-snug">
+                    <CardContent className="relative z-10 flex flex-col gap-6 flex-1 px-8 pb-8 pt-2">
+                      {/* Impact metric (Premium Box) */}
+                      <div className="flex items-center gap-4 p-4 rounded-2xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors duration-500">
+                        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500">
+                          <TrendingUp className="w-5 h-5" />
+                        </div>
+                        <p className="text-xs sm:text-sm font-extrabold text-primary leading-tight">
                           {project.impact}
                         </p>
                       </div>
 
-                      {/* Technologies */}
+                      {/* Technologies (Modern Tags) */}
                       <div>
-                        <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
-                          Stack
-                        </p>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="h-[1px] flex-1 bg-border/50" />
+                          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                            Tech Stack
+                          </p>
+                          <div className="h-[1px] flex-1 bg-border/50" />
+                        </div>
                         <div className="flex flex-wrap gap-1.5">
                           {project.technologies.map((tech, techIndex) => (
                             <span
                               key={techIndex}
-                              className="px-2.5 py-1 text-xs bg-secondary text-secondary-foreground rounded-md border border-border/60"
+                              className="px-3 py-1 text-[11px] font-bold bg-white/5 dark:bg-black/20 text-foreground/80 rounded-lg border border-white/10 dark:border-white/5 hover:border-primary/50 hover:text-primary transition-all duration-300 cursor-default"
                             >
                               {tech}
                             </span>
@@ -201,34 +207,25 @@ export function Projects() {
                         </div>
                       </div>
 
-                      {/* Highlights */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {project.highlights.map((highlight, i) => (
-                          <span
-                            key={i}
-                            className="px-2.5 py-1 text-xs bg-primary/8 text-primary/80 rounded-full border border-primary/15"
-                          >
-                            {highlight}
-                          </span>
-                        ))}
-                      </div>
-
                       {/* Footer: source indicator */}
-                      <div className="mt-auto pt-3 border-t border-border/50">
+                      <div className="mt-auto pt-6 border-t border-border/30">
                         {project.confidential ? (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Lock className="w-3.5 h-3.5" />
-                            <span>Source confidential — proprietary system</span>
+                          <div className="flex items-center justify-between text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest">
+                            <div className="flex items-center gap-2">
+                              <Lock className="w-3.5 h-3.5" />
+                              <span>Proprietary</span>
+                            </div>
+                            <span className="text-primary/60">Verified</span>
                           </div>
                         ) : project.link ? (
                           <a
                             href={project.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline underline-offset-4 transition-colors"
+                            className="inline-flex items-center gap-2 text-xs font-black text-primary hover:text-primary/80 transition-colors uppercase tracking-widest"
                           >
-                            <Github className="w-3.5 h-3.5" />
-                            View on GitHub
+                            <Github className="w-4 h-4" />
+                            View Source
                           </a>
                         ) : null}
                       </div>
