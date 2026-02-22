@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import { Button } from "@/components/ui/button";
-import { Github, Linkedin, Mail, MapPin, Phone, ArrowDown } from "lucide-react";
+import { Github, Linkedin, Mail, MapPin, Phone, ArrowDown, Download } from "lucide-react";
 import { personalInfo, highlights } from "@/data/portfolio";
 import Image from "next/image";
 
@@ -64,7 +64,7 @@ export function Hero() {
             {/* Name */}
             <motion.h1
               variants={itemVariants}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 gradient-text leading-tight"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-4 gradient-text tracking-tighter leading-[1.1]"
             >
               {personalInfo.name}
             </motion.h1>
@@ -72,31 +72,31 @@ export function Hero() {
             {/* Typing title */}
             <motion.h2
               variants={itemVariants}
-              className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 text-foreground min-h-[2.5rem]"
+              className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-foreground/90 flex items-center justify-center lg:justify-start gap-2"
             >
+              <span className="text-primary hidden sm:inline">I'm a</span>
               <TypeAnimation
                 sequence={[
                   "Full Stack Engineer",
-                  2000,
-                  "Enterprise .NET Developer",
-                  2000,
-                  "SAP Integration Specialist",
-                  2000,
-                  "Blazor & C# Engineer",
-                  2000,
-                  ".NET 8 Architect",
-                  2000,
+                  3000,
+                  "Enterprise Architect",
+                  3000,
+                  "SAP Integration Expert",
+                  3000,
+                  "C# & .NET Specialist",
+                  3000,
                 ]}
                 wrapper="span"
                 speed={50}
                 repeat={Infinity}
+                className="bg-primary/5 px-2 rounded-lg"
               />
             </motion.h2>
 
             {/* Subtitle */}
             <motion.p
               variants={itemVariants}
-              className="text-base sm:text-lg text-muted-foreground mb-3 max-w-xl mx-auto lg:mx-0"
+              className="text-lg sm:text-xl font-medium text-foreground/80 mb-4 max-w-xl mx-auto lg:mx-0"
             >
               {personalInfo.subtitle}
             </motion.p>
@@ -104,23 +104,24 @@ export function Hero() {
             {/* Description */}
             <motion.p
               variants={itemVariants}
-              className="text-sm sm:text-base text-muted-foreground/80 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+              className="text-base sm:text-lg text-muted-foreground/90 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal"
             >
               {personalInfo.description}
             </motion.p>
 
-            {/* Highlights */}
+            {/* Highlights Grid (Bento Lite) */}
             <motion.div
               variants={itemVariants}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 max-w-xl mx-auto lg:mx-0"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-4 mb-10 max-w-2xl mx-auto lg:mx-0"
             >
-              {highlights.map((highlight, index) => (
+              {highlights.slice(0, 4).map((highlight, index) => (
                 <motion.div
                   key={index}
-                  whileHover={{ scale: 1.03, y: -3 }}
-                  className="glass px-4 py-3 rounded-lg"
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="glass p-4 rounded-2xl border border-white/10 dark:border-white/5 flex flex-col gap-1 group transition-all duration-300"
                 >
-                  <p className="text-xs sm:text-sm font-medium text-primary">
+                  <div className="h-1.5 w-8 rounded-full bg-primary/30 group-hover:bg-primary transition-colors mb-1" />
+                  <p className="text-sm font-bold text-foreground leading-snug">
                     {highlight}
                   </p>
                 </motion.div>
@@ -162,26 +163,25 @@ export function Hero() {
               <Button
                 size="lg"
                 variant="gradient"
-                onClick={handleContact}
-                className="w-full sm:w-auto"
-              >
-                Get In Touch
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
                 className="w-full sm:w-auto"
                 asChild
               >
                 <a
-                  href={personalInfo.social.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/Krisantha_Sarma_CV.pdf"
+                  download
                   className="flex items-center gap-2"
                 >
-                  <Linkedin className="h-4 w-4" />
-                  LinkedIn Profile
+                  <Download className="h-4 w-4" />
+                  Download CV
                 </a>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleContact}
+                className="w-full sm:w-auto"
+              >
+                Get In Touch
               </Button>
             </motion.div>
 
@@ -216,54 +216,69 @@ export function Hero() {
           </motion.div>
 
           {/* ── Right: Profile Photo ───────────────────────────────── */}
+          {/* ── Right: Profile Photo ───────────────────────────────── */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.85, x: 40 }}
+            initial={{ opacity: 0, scale: 0.9, x: 50 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            className="flex-shrink-0 flex items-center justify-center"
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            className="flex-shrink-0 flex items-center justify-center relative group lg:ml-auto px-10 pt-6 pb-8 sm:px-12 sm:pt-8 sm:pb-10"
           >
-            {/* Outer glow ring */}
-            <div className="relative">
-              <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 opacity-30 blur-xl animate-pulse" />
+            {/* Outer glow */}
+            <div className="absolute -inset-4 sm:-inset-8 rounded-[4rem] bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 pointer-events-none" />
 
-              {/* Gradient border ring */}
-              <div className="relative p-[3px] rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 shadow-2xl">
-                {/* Inner padding + photo */}
-                <div className="rounded-full overflow-hidden bg-background p-[3px]">
-                  <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden">
-                    <Image
-                      src="/profile.jpg"
-                      alt="Krisantha Sarma — Full Stack Engineer"
-                      fill
-                      sizes="(max-width: 640px) 224px, (max-width: 768px) 256px, (max-width: 1024px) 288px, 320px"
-                      className="object-cover object-top"
-                      priority
-                    />
-                  </div>
+            {/* Squircle frame */}
+            <div className="relative p-1 squircle bg-gradient-to-br from-white/20 via-white/5 to-transparent dark:from-white/10 dark:via-transparent dark:to-white/5 shadow-2xl backdrop-blur-sm">
+
+              {/* Image */}
+              <div className="squircle overflow-hidden bg-background p-1 relative profile-frame">
+                <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 squircle overflow-hidden bg-muted/30">
+                  <Image
+                    src="/profile.jpg"
+                    alt="Krisantha Sarma — Full Stack Engineer"
+                    fill
+                    sizes="(max-width: 640px) 224px, (max-width: 768px) 256px, (max-width: 1024px) 288px, 320px"
+                    className="object-cover object-top hover:scale-105 transition-transform duration-700 ease-in-out"
+                    priority
+                  />
                 </div>
               </div>
 
-              {/* Floating badge — years experience */}
+              {/* Badge — years experience */}
               <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1, duration: 0.4, type: "spring" }}
-                className="absolute -bottom-2 -left-4 glass px-3 py-2 rounded-xl border border-primary/20 shadow-lg"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1, duration: 0.5, type: "spring" }}
+                className="absolute -bottom-2 -left-4 sm:-bottom-4 sm:-left-8 bg-white/85 dark:bg-gray-900/90 backdrop-blur-xl border border-white/40 dark:border-white/15 shadow-xl px-3 py-2 sm:px-5 sm:py-3 rounded-2xl z-20"
               >
-                <p className="text-xs font-semibold text-primary">8+ Years</p>
-                <p className="text-xs text-muted-foreground">Experience</p>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <span className="font-bold text-base sm:text-lg">8+</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold leading-none mb-1">Years</p>
+                    <p className="text-xs sm:text-sm font-extrabold text-foreground leading-none">Experience</p>
+                  </div>
+                </div>
               </motion.div>
 
-              {/* Floating badge — enterprise apps */}
+              {/* Badge — apps delivered */}
               <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.2, duration: 0.4, type: "spring" }}
-                className="absolute -top-2 -right-4 glass px-3 py-2 rounded-xl border border-primary/20 shadow-lg"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.2, duration: 0.5, type: "spring" }}
+                className="absolute -top-2 -right-4 sm:-top-4 sm:-right-8 bg-white/85 dark:bg-gray-900/90 backdrop-blur-xl border border-white/40 dark:border-white/15 shadow-xl px-3 py-2 sm:px-5 sm:py-3 rounded-2xl z-20"
               >
-                <p className="text-xs font-semibold text-primary">15+ Apps</p>
-                <p className="text-xs text-muted-foreground">Delivered</p>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex flex-col text-right">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold leading-none mb-1">Delivered</p>
+                    <p className="text-xs sm:text-sm font-extrabold text-foreground leading-none">15+ Apps</p>
+                  </div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <span className="font-bold text-sm sm:text-lg">⚡</span>
+                  </div>
+                </div>
               </motion.div>
+
             </div>
           </motion.div>
 
