@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { personalInfo } from "@/data/portfolio";
-import { Mail, Phone, MapPin, Github, Linkedin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Github, Linkedin, Send, CheckCircle2 } from "lucide-react";
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -14,25 +14,41 @@ export function Contact() {
     subject: "",
     message: "",
   });
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const encode = (data: Record<string, string>) =>
+    Object.keys(data)
+      .map((key) => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+      .join("&");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Create mailto link with form data
-    const mailtoLink = `mailto:${personalInfo.email}?subject=${encodeURIComponent(
-      formData.subject
-    )}&body=${encodeURIComponent(
-      `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
-    )}`;
-    window.location.href = mailtoLink;
+    setSubmitting(true);
+    try {
+      await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: encode({ "form-name": "contact", ...formData }),
+      });
+      setSubmitted(true);
+    } catch {
+      // Fallback: open mail client
+      const mailtoLink = `mailto:${personalInfo.email}?subject=${encodeURIComponent(
+        formData.subject
+      )}&body=${encodeURIComponent(
+        `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
+      )}`;
+      window.open(mailtoLink);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
@@ -49,7 +65,7 @@ export function Contact() {
             Get In <span className="gradient-text">Touch</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Let's discuss how I can help bring your project to life
+            Open to full-time roles, contract work, and technical consultations
           </p>
         </motion.div>
 
@@ -65,15 +81,13 @@ export function Contact() {
             <div>
               <h3 className="text-2xl font-bold mb-6">Contact Information</h3>
               <p className="text-muted-foreground mb-8">
-                Feel free to reach out through any of these channels. I'm always open to
-                discussing new projects, creative ideas, or opportunities.
+                Reach out through any channel below. I typically respond within one business day.
               </p>
             </div>
 
             <div className="space-y-6">
-              <motion.a
+              <a
                 href={`mailto:${personalInfo.email}`}
-                whileHover={{ x: 10 }}
                 className="flex items-center gap-4 group"
               >
                 <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-shadow">
@@ -85,11 +99,10 @@ export function Contact() {
                     {personalInfo.email}
                   </p>
                 </div>
-              </motion.a>
+              </a>
 
-              <motion.a
+              <a
                 href={`tel:${personalInfo.phone}`}
-                whileHover={{ x: 10 }}
                 className="flex items-center gap-4 group"
               >
                 <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 group-hover:shadow-lg group-hover:shadow-blue-500/50 transition-shadow">
@@ -101,25 +114,22 @@ export function Contact() {
                     {personalInfo.phone}
                   </p>
                 </div>
-              </motion.a>
+              </a>
 
-              <motion.div
-                whileHover={{ x: 10 }}
-                className="flex items-center gap-4 group"
-              >
-                <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 group-hover:shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+              <div className="flex items-center gap-4 group">
+                <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500">
                   <MapPin className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Location</p>
                   <p className="font-medium">{personalInfo.location}</p>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {/* Social Links */}
             <div className="pt-8 border-t border-border">
-              <h4 className="text-lg font-semibold mb-4">Connect on Social</h4>
+              <h4 className="text-lg font-semibold mb-4">Connect</h4>
               <div className="flex gap-4">
                 <motion.a
                   href={personalInfo.social.github}
@@ -128,6 +138,7 @@ export function Contact() {
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.9 }}
                   className="p-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+                  aria-label="GitHub"
                 >
                   <Github className="w-6 h-6" />
                 </motion.a>
@@ -138,6 +149,7 @@ export function Contact() {
                   whileHover={{ scale: 1.1, rotate: -5 }}
                   whileTap={{ scale: 0.9 }}
                   className="p-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+                  aria-label="LinkedIn"
                 >
                   <Linkedin className="w-6 h-6" />
                 </motion.a>
@@ -167,93 +179,112 @@ export function Contact() {
           >
             <Card>
               <CardContent className="p-6 sm:p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium mb-2"
+                {submitted ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center">
+                      <CheckCircle2 className="w-8 h-8 text-green-500" />
+                    </div>
+                    <h3 className="text-xl font-bold">Message Sent!</h3>
+                    <p className="text-muted-foreground max-w-xs">
+                      Thanks for reaching out. I&apos;ll get back to you within one business day.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSubmitted(false);
+                        setFormData({ name: "", email: "", subject: "", message: "" });
+                      }}
                     >
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      placeholder="Your name"
-                    />
+                      Send Another Message
+                    </Button>
                   </div>
-
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium mb-2"
-                    >
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      placeholder="your.email@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="subject"
-                      className="block text-sm font-medium mb-2"
-                    >
-                      Subject
-                    </label>
-                    <input
-                      type="text"
-                      id="subject"
-                      name="subject"
-                      required
-                      value={formData.subject}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      placeholder="What's this about?"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="message"
-                      className="block text-sm font-medium mb-2"
-                    >
-                      Message
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      required
-                      value={formData.message}
-                      onChange={handleChange}
-                      rows={5}
-                      className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                      placeholder="Tell me about your project..."
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    variant="gradient"
-                    size="lg"
-                    className="w-full"
+                ) : (
+                  <form
+                    name="contact"
+                    method="POST"
+                    data-netlify="true"
+                    onSubmit={handleSubmit}
+                    className="space-y-6"
                   >
-                    <Send className="mr-2 h-4 w-4" />
-                    Send Message
-                  </Button>
-                </form>
+                    {/* Required hidden input for Netlify Forms */}
+                    <input type="hidden" name="form-name" value="contact" />
+
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium mb-2">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        required
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        placeholder="Your name"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium mb-2">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="subject" className="block text-sm font-medium mb-2">
+                        Subject
+                      </label>
+                      <input
+                        type="text"
+                        id="subject"
+                        name="subject"
+                        required
+                        value={formData.subject}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        placeholder="Job opportunity / Project inquiry / etc."
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="message" className="block text-sm font-medium mb-2">
+                        Message
+                      </label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        required
+                        value={formData.message}
+                        onChange={handleChange}
+                        rows={5}
+                        className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                        placeholder="Tell me about the role or project..."
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      variant="gradient"
+                      size="lg"
+                      className="w-full"
+                      disabled={submitting}
+                    >
+                      <Send className="mr-2 h-4 w-4" />
+                      {submitting ? "Sending…" : "Send Message"}
+                    </Button>
+                  </form>
+                )}
               </CardContent>
             </Card>
           </motion.div>

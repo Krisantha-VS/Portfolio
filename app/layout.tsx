@@ -1,24 +1,39 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { MeshGradient } from "@/components/mesh-gradient";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
 export const metadata: Metadata = {
-  title: "Krisantha Sarma | Full Stack Engineer",
+  metadataBase: new URL("https://krisantha-sarma.dev"),
+  title: "Krisantha Sarma | Full Stack Engineer — C#, .NET 8, Blazor",
   description:
-    "Full Stack Engineer architecting enterprise-scale applications for global manufacturing operations. Expert in C#, ASP.NET Core, and Blazor.",
+    "Full Stack Engineer with 8+ years experience. Specialist in C#, .NET 8, Blazor, and SAP integration. Delivered 15+ mission-critical enterprise applications for global manufacturing. Open to remote work.",
   keywords: [
     "Full Stack Engineer",
     "C#",
-    ".NET",
+    ".NET 8",
     "Blazor",
     "ASP.NET Core",
+    "SAP Integration",
+    "Enterprise Applications",
+    "Blazor Server",
+    "Blazor Hybrid",
+    ".NET MAUI",
+    "SQL Server",
+    "Entity Framework Core",
+    "SignalR",
+    "MudBlazor",
     "React",
     "TypeScript",
-    "Software Developer",
-    "Web Development",
-    "Enterprise Applications",
-    "SAP Integration",
+    "Remote Developer",
+    "Software Engineer Sri Lanka",
   ],
   authors: [{ name: "Krisantha Sarma" }],
   creator: "Krisantha Sarma",
@@ -38,13 +53,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://krisantha-sarma.dev",
-    siteName: "Krisantha Sarma Portfolio",
-    title: "Krisantha Sarma | Full Stack Engineer",
+    siteName: "Krisantha Sarma — Full Stack Engineer",
+    title: "Krisantha Sarma | Full Stack Engineer — C#, .NET 8, Blazor",
     description:
-      "Full Stack Engineer architecting enterprise-scale applications. Expert in C#, ASP.NET Core, and Blazor.",
+      "Full Stack Engineer with 8+ years experience. Specialist in C#, .NET 8, Blazor, and SAP integration. 15+ enterprise applications delivered. Open to remote work.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/og-image.svg",
         width: 1200,
         height: 630,
         alt: "Krisantha Sarma - Full Stack Engineer",
@@ -53,10 +68,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Krisantha Sarma | Full Stack Engineer",
+    title: "Krisantha Sarma | Full Stack Engineer — C#, .NET 8, Blazor",
     description:
-      "Full Stack Engineer architecting enterprise-scale applications. Expert in C#, ASP.NET Core, and Blazor.",
-    images: ["/og-image.jpg"],
+      "Full Stack Engineer with 8+ years experience. Specialist in C#, .NET 8, Blazor, and SAP integration. 15+ enterprise applications delivered. Open to remote work.",
+    images: ["/og-image.svg"],
   },
   icons: {
     icon: [
@@ -75,7 +90,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen antialiased font-sans">
+      <body className={`min-h-screen antialiased ${inter.variable} font-sans`}>
         <ThemeProvider defaultTheme="dark" storageKey="portfolio-theme">
           <MeshGradient />
           {children}
