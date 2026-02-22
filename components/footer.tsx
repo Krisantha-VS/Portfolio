@@ -16,7 +16,7 @@ export function Footer() {
               {personalInfo.name}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Full Stack Engineer crafting exceptional digital experiences
+              Full Stack Engineer — C#, .NET 8, Blazor & SAP Integration
             </p>
           </div>
 

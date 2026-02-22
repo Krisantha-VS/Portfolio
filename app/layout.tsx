@@ -4,21 +4,29 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { MeshGradient } from "@/components/mesh-gradient";
 
 export const metadata: Metadata = {
-  title: "Krisantha Sarma | Full Stack Engineer",
+  metadataBase: new URL("https://krisantha-sarma.dev"),
+  title: "Krisantha Sarma | Full Stack Engineer — C#, .NET 8, Blazor",
   description:
-    "Full Stack Engineer architecting enterprise-scale applications for global manufacturing operations. Expert in C#, ASP.NET Core, and Blazor.",
+    "Full Stack Engineer with 8+ years experience. Specialist in C#, .NET 8, Blazor, and SAP integration. Delivered 15+ mission-critical enterprise applications for global manufacturing. Open to remote work.",
   keywords: [
     "Full Stack Engineer",
     "C#",
-    ".NET",
+    ".NET 8",
     "Blazor",
     "ASP.NET Core",
+    "SAP Integration",
+    "Enterprise Applications",
+    "Blazor Server",
+    "Blazor Hybrid",
+    ".NET MAUI",
+    "SQL Server",
+    "Entity Framework Core",
+    "SignalR",
+    "MudBlazor",
     "React",
     "TypeScript",
-    "Software Developer",
-    "Web Development",
-    "Enterprise Applications",
-    "SAP Integration",
+    "Remote Developer",
+    "Software Engineer Sri Lanka",
   ],
   authors: [{ name: "Krisantha Sarma" }],
   creator: "Krisantha Sarma",
@@ -38,10 +46,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://krisantha-sarma.dev",
-    siteName: "Krisantha Sarma Portfolio",
-    title: "Krisantha Sarma | Full Stack Engineer",
+    siteName: "Krisantha Sarma — Full Stack Engineer",
+    title: "Krisantha Sarma | Full Stack Engineer — C#, .NET 8, Blazor",
     description:
-      "Full Stack Engineer architecting enterprise-scale applications. Expert in C#, ASP.NET Core, and Blazor.",
+      "Full Stack Engineer with 8+ years experience. Specialist in C#, .NET 8, Blazor, and SAP integration. 15+ enterprise applications delivered. Open to remote work.",
     images: [
       {
         url: "/og-image.jpg",
@@ -53,9 +61,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Krisantha Sarma | Full Stack Engineer",
+    title: "Krisantha Sarma | Full Stack Engineer — C#, .NET 8, Blazor",
     description:
-      "Full Stack Engineer architecting enterprise-scale applications. Expert in C#, ASP.NET Core, and Blazor.",
+      "Full Stack Engineer with 8+ years experience. Specialist in C#, .NET 8, Blazor, and SAP integration. 15+ enterprise applications delivered. Open to remote work.",
     images: ["/og-image.jpg"],
   },
   icons: {
