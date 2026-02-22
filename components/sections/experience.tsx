@@ -72,8 +72,7 @@ export function Experience() {
 
                 {/* Content */}
                 <div className="w-full md:w-[calc(50%-3rem)]">
-                  <Card className="hover:shadow-xl transition-all duration-300 group overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Card className="hover:shadow-xl transition-all duration-300 group overflow-hidden hover:border-primary/30">
                     <CardHeader>
                       <div className="flex items-start justify-between gap-4 mb-2">
                         <CardTitle className="text-xl sm:text-2xl">{exp.title}</CardTitle>
@@ -146,8 +145,7 @@ export function Experience() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="h-full hover:shadow-xl transition-all duration-300 group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
+                <Card className="h-full hover:shadow-xl transition-all duration-300 hover:border-primary/30">
                   <CardContent className="p-6 relative">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500">
