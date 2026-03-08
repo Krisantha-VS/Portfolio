@@ -1,0 +1,21 @@
+Options -Indexes
+DirectorySlash Off
+RewriteEngine On
+
+# Static assets and backend — pass through as-is
+RewriteRule ^(_next|backend)/ - [L]
+
+# Serve existing files as-is
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Clean URLs — match .html file before any directory handling
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
+RewriteRule ^(.+?)/?$ /$1.html [L]
+
+# Real directories (e.g. _next/static/)
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Fallback
+RewriteRule ^ /404.html [L]
