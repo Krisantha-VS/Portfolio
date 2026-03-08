@@ -1,0 +1,18 @@
+# Allow api.php/boards/1 style path-info routing
+AcceptPathInfo On
+
+# Block direct access to config files
+<FilesMatch "env\.php$">
+    Require all denied
+</FilesMatch>
+
+# Only allow PHP files to be executed
+<FilesMatch "\.php$">
+    Options -Indexes
+</FilesMatch>
+
+# Block access to sql folder
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^sql/ - [F,L]
+</IfModule>

@@ -29,6 +29,10 @@ yarn-error.log*
 .env*.local
 .env
 
+# PHP secrets
+backend/config/env.php
+public/backend/config/env.php
+
 # vercel
 .vercel
 
