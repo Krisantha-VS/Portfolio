@@ -32,6 +32,11 @@ export function Hero() {
     document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleViewLiveProjects = () => {
+    document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
+    window.dispatchEvent(new CustomEvent("set-project-filter", { detail: "Open Source" }));
+  };
+
   return (
     <section
       id="home"
@@ -185,6 +190,21 @@ export function Hero() {
               </Button>
             </motion.div>
 
+            {/* Explore CTA */}
+            <motion.div variants={itemVariants} className="flex items-center justify-center lg:justify-start mb-6">
+              <a
+                href="/explore"
+                className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all duration-200"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                </span>
+                <span className="text-sm font-medium text-emerald-400">Live Work</span>
+                <svg className="w-3.5 h-3.5 text-emerald-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </motion.div>
+
             {/* Social Icons */}
             <motion.div
               variants={itemVariants}
@@ -232,12 +252,22 @@ export function Hero() {
               {/* Image */}
               <div className="squircle overflow-hidden bg-background p-1 relative profile-frame">
                 <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 squircle overflow-hidden bg-muted/30">
+                  {/* Dark mode image */}
                   <Image
-                    src="/profile.jpg"
+                    src="/profile.png"
                     alt="Krisantha Sarma — Full Stack Engineer"
                     fill
                     sizes="(max-width: 640px) 224px, (max-width: 768px) 256px, (max-width: 1024px) 288px, 320px"
-                    className="object-cover object-top hover:scale-105 transition-transform duration-700 ease-in-out"
+                    className="object-cover object-top hover:scale-105 transition-transform duration-700 ease-in-out hidden dark:block"
+                    priority
+                  />
+                  {/* Light mode image */}
+                  <Image
+                    src="/profile-old.jpg"
+                    alt="Krisantha Sarma — Full Stack Engineer"
+                    fill
+                    sizes="(max-width: 640px) 224px, (max-width: 768px) 256px, (max-width: 1024px) 288px, 320px"
+                    className="object-cover object-top hover:scale-105 transition-transform duration-700 ease-in-out block dark:hidden"
                     priority
                   />
                 </div>

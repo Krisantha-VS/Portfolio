@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Moon, Sun, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
@@ -21,6 +23,8 @@ export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,22 +72,34 @@ export function Navigation() {
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <motion.a
-            href="#home"
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick("#home");
-            }}
-            className="text-xl md:text-2xl font-bold gradient-text cursor-pointer"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            KS
-          </motion.a>
+          {isHome ? (
+            <motion.a
+              href="#home"
+              onClick={(e) => { e.preventDefault(); handleNavClick("#home"); }}
+              className="text-xl md:text-2xl font-bold gradient-text cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              KS
+            </motion.a>
+          ) : (
+            <Link href="/" className="text-xl md:text-2xl font-bold gradient-text">
+              KS
+            </Link>
+          )}
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
+            {!isHome && (
+              <Link
+                href="/"
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                Home
+              </Link>
+            )}
+            {isHome && navItems.map((item) => (
               <motion.a
                 key={item.name}
                 href={item.href}
@@ -109,6 +125,32 @@ export function Navigation() {
                 )}
               </motion.a>
             ))}
+            <motion.div whileHover={{ y: -2 }}>
+              <Link
+                href="/explore"
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-emerald-400 relative inline-flex items-center gap-1.5",
+                  pathname === "/explore"
+                    ? "text-primary"
+                    : "text-emerald-400 animate-pulse hover:animate-none"
+                )}
+              >
+                Live Work
+                {pathname !== "/explore" && (
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                  </span>
+                )}
+                {pathname === "/explore" && (
+                  <motion.div
+                    layoutId="activeSection"
+                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </Link>
+            </motion.div>
           </div>
 
           {/* Theme Toggle & Mobile Menu */}
@@ -151,7 +193,17 @@ export function Navigation() {
               className="md:hidden overflow-hidden bg-background border-t border-border"
             >
               <div className="py-4 space-y-2 bg-background">
-                {navItems.map((item, index) => (
+                {!isHome && (
+                  <Link
+                    href="/"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full text-left flex items-center gap-2 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                    Back to Home
+                  </Link>
+                )}
+                {isHome && navItems.map((item, index) => (
                   <motion.button
                     key={item.name}
                     onClick={() => handleNavClick(item.href)}
@@ -168,6 +220,33 @@ export function Navigation() {
                     {item.name}
                   </motion.button>
                 ))}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navItems.length * 0.1 }}
+                >
+                  <Link
+                    href="/explore"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      "w-full text-left flex items-center justify-between px-4 py-3 text-base font-medium rounded-lg transition-colors",
+                      pathname === "/explore"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <span className="flex items-center gap-2">
+                      Live Work
+                      {pathname !== "/explore" && (
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs font-normal text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Live</span>
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
           )}

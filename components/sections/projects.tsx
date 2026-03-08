@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { projects, personalInfo } from "@/data/portfolio";
@@ -32,6 +32,15 @@ const categoryConfig: Record<
 
 export function Projects() {
   const [selectedCategory, setSelectedCategory] = useState<Category>("All");
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const category = (e as CustomEvent).detail as Category;
+      if (category) setSelectedCategory(category);
+    };
+    window.addEventListener("set-project-filter", handler);
+    return () => window.removeEventListener("set-project-filter", handler);
+  }, []);
 
   const counts = {
     All: projects.length,
@@ -96,7 +105,8 @@ export function Projects() {
                     "relative inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
                     isActive
                       ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25"
-                      : "bg-background/60 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                      : "bg-background/60 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground",
+                    category === "Open Source" && !isActive && "border-emerald-500/40 text-emerald-400 animate-pulse hover:animate-none"
                   )}
                 >
                   {category !== "All" && (
@@ -120,6 +130,9 @@ export function Projects() {
                   >
                     {counts[category]}
                   </span>
+                  {category === "Open Source" && !isActive && (
+                    <span className="absolute -top-1.5 -right-1.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
                 </button>
               );
             })}
@@ -243,29 +256,47 @@ export function Projects() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="mt-16 text-center"
+          className="mt-16"
         >
-          <Card className="max-w-3xl mx-auto glass">
-            <CardContent className="p-8">
-              <h3 className="text-xl font-bold mb-3">
-                Enterprise projects are listed without source links
-              </h3>
-              <p className="text-muted-foreground text-sm sm:text-base mb-6">
-                All VarioSystems applications are proprietary internal systems.
-                NDAs are in place and source code is not publicly available.
-                Open source work and freelance builds are linked directly above.
+          <div className="max-w-3xl mx-auto rounded-2xl overflow-hidden border border-white/10 dark:border-white/5">
+            {/* Explore strip */}
+            <div className="relative bg-gradient-to-r from-emerald-950/60 via-teal-950/40 to-emerald-950/60 border-b border-emerald-500/20 p-8 text-center">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
+              <span className="relative inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-emerald-400 mb-3">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                </span>
+                Live in production
+              </span>
+              <h3 className="text-xl font-bold text-white mb-2">Want to see real apps running?</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                The Live Work section showcases production-grade applications with live demos, full source code, and real users.
+              </p>
+              <a
+                href="/explore"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors shadow-lg shadow-emerald-500/25"
+              >
+                Live Work
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+            {/* GitHub strip */}
+            <div className="bg-background/60 px-8 py-4 flex items-center justify-between gap-4 flex-wrap">
+              <p className="text-xs text-muted-foreground">
+                Enterprise projects are proprietary — NDAs in place, source not public.
               </p>
               <a
                 href={personalInfo.social.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-primary hover:underline underline-offset-4 font-medium text-sm"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors shrink-0"
               >
-                <Github className="w-4 h-4" />
-                View public repositories on GitHub
+                <Github className="w-3.5 h-3.5" />
+                GitHub repositories
               </a>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
