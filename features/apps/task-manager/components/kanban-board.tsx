@@ -114,7 +114,7 @@ export function KanbanBoard({ token, boardId }: Props) {
       {editingTask && (
         <TaskEditModal
           task={editingTask}
-          onSave={updateTask}
+          onSave={async (id, data) => { await updateTask(id, data); }}
           onClose={() => setEditingTask(null)}
         />
       )}
