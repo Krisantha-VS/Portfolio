@@ -14,10 +14,10 @@ $method = $_SERVER['REQUEST_METHOD'];
 $path   = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 // e.g. backend/modules/task-manager/api.php/boards/1/tasks
 $parts  = explode('/', $path);
-$action = $parts[array_search('api.php', $parts) + 1] ?? '';
-$id     = isset($parts[array_search('api.php', $parts) + 2])
-          ? (int) $parts[array_search('api.php', $parts) + 2]
-          : null;
+$apiIdx = array_search('api.php', $parts);
+if ($apiIdx === false) json_err('Invalid path', 'NOT_FOUND', 404);
+$action = $parts[$apiIdx + 1] ?? '';
+$id     = isset($parts[$apiIdx + 2]) ? (int) $parts[$apiIdx + 2] : null;
 
 $payload = require_auth(); // validates JWT, returns claims
 $user_id = $payload['sub'];
@@ -61,14 +61,29 @@ function create_board(string $user_id, array $body): void {
     $db = DB::get();
     $db->prepare("INSERT INTO tm_boards (user_id, name) VALUES (?, ?)")->execute([$user_id, $name]);
     $id = (int) $db->lastInsertId();
-    json_ok(['id' => $id, 'user_id' => $user_id, 'name' => $name], 201);
+    $stmt = $db->prepare("SELECT * FROM tm_boards WHERE id = ?");
+    $stmt->execute([$id]);
+    json_ok($stmt->fetch(), 201);
 }
 
 function delete_board(string $user_id, int $id): void {
-    $stmt = DB::get()->prepare("DELETE FROM tm_boards WHERE id = ? AND user_id = ?");
-    $stmt->execute([$id, $user_id]);
-    if ($stmt->rowCount() === 0) json_err('Board not found', 'NOT_FOUND', 404);
-    json_ok(null);
+    $db = DB::get();
+    $db->beginTransaction();
+    try {
+        $check = $db->prepare("SELECT id FROM tm_boards WHERE id = ? AND user_id = ?");
+        $check->execute([$id, $user_id]);
+        if (!$check->fetch()) {
+            $db->rollBack();
+            json_err('Board not found', 'NOT_FOUND', 404);
+        }
+        $db->prepare("DELETE FROM tm_tasks WHERE board_id = ?")->execute([$id]);
+        $db->prepare("DELETE FROM tm_boards WHERE id = ? AND user_id = ?")->execute([$id, $user_id]);
+        $db->commit();
+        json_ok(null);
+    } catch (Exception $e) {
+        $db->rollBack();
+        json_err('Failed to delete board', 'SERVER_ERROR', 500);
+    }
 }
 
 function rename_board(string $user_id, int $id, array $body): void {
@@ -167,6 +182,13 @@ function update_task(string $user_id, int $id, array $body): void {
         }
     } else {
         $due_date = $task['due_date'];
+    }
+
+    if (array_key_exists('status', $body) && !in_array($body['status'], ['todo','in_progress','done'])) {
+        json_err('Invalid status value', 'VALIDATION_ERROR', 400);
+    }
+    if (array_key_exists('priority', $body) && !in_array($body['priority'], ['low','medium','high'])) {
+        json_err('Invalid priority value', 'VALIDATION_ERROR', 400);
     }
 
     if (!in_array($priority, ['low','medium','high']))       $priority = 'medium';

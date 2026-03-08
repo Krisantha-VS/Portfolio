@@ -5,7 +5,13 @@ import { Plus, Trash2, LogOut, Kanban, Menu, X } from 'lucide-react';
 import { KanbanBoard } from './kanban-board';
 import { useBoards } from '../hooks/useTasks';
 import { AUTH_BASE, AUTH_CLIENT_ID } from '@/shared/config';
-import { storeTokens, getAccessToken, getRefreshToken, clearTokens } from '../lib/auth-fetch';
+import {
+  storeTokens,
+  getAccessToken,
+  getRefreshToken,
+  clearTokens,
+  refreshAccessToken,
+} from '../lib/auth-fetch';
 import { cn } from '@/lib/utils';
 
 // ─── JWT decode ───────────────────────────────────────────
@@ -29,22 +35,33 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-const FORGOT_PASSWORD_URL = `${AUTH_BASE.replace('/api/v1', '')}/dashboard/forgot-password`;
-
 // ─── Minimal inline auth ──────────────────────────────────
 
 function useInlineAuth() {
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [token, setToken]                       = useState<string | null>(null);
+  const [loading, setLoading]                   = useState(false);
+  const [error, setError]                       = useState('');
+  // Fix M4: registration success state
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
+  // Fix A7: on mount — restore from sessionStorage, or try refresh if only refresh token exists
   useEffect(() => {
     const stored = getAccessToken();
-    if (stored) setToken(stored);
+    if (stored) {
+      setToken(stored);
+      return;
+    }
+    // Fix A7: no access token in session, but refresh token exists — try silent refresh
+    const refresh = getRefreshToken();
+    if (refresh) {
+      refreshAccessToken().then(newToken => {
+        if (newToken) setToken(newToken);
+      });
+    }
   }, []);
 
   const login = async (email: string, password: string) => {
-    setLoading(true); setError('');
+    setLoading(true); setError(''); setRegistrationSuccess(false);
     try {
       const res  = await fetch(`${AUTH_BASE}/auth/login`, {
         method:  'POST',
@@ -54,6 +71,7 @@ function useInlineAuth() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error);
       storeTokens(json.data.accessToken, json.data.refreshToken);
+      // Fix A1/A2: setToken here is reactive — no sessionStorage read needed
       setToken(json.data.accessToken);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Login failed');
@@ -61,7 +79,7 @@ function useInlineAuth() {
   };
 
   const register = async (email: string, password: string, name: string) => {
-    setLoading(true); setError('');
+    setLoading(true); setError(''); setRegistrationSuccess(false);
     try {
       const res  = await fetch(`${AUTH_BASE}/auth/register`, {
         method:  'POST',
@@ -71,40 +89,70 @@ function useInlineAuth() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error);
       storeTokens(json.data.tokens.accessToken, json.data.tokens.refreshToken);
+      // Fix M4: signal registration success before setting token
+      setRegistrationSuccess(true);
       setToken(json.data.tokens.accessToken);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Registration failed');
     } finally { setLoading(false); }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearTokens();
     setToken(null);
-  };
+    setRegistrationSuccess(false);
+  }, []);
 
-  return { token, loading, error, login, register, logout };
+  return { token, loading, error, registrationSuccess, login, register, logout };
 }
 
 // ─── Auth Gate ────────────────────────────────────────────
 
-function AuthGate({ onAuth }: { onAuth: (token: string) => void }) {
-  const { login, register, loading, error } = useInlineAuth();
-  const [mode, setMode]     = useState<'login' | 'register'>('login');
-  const [email, setEmail]   = useState('');
-  const [password, setPass] = useState('');
-  const [name, setName]     = useState('');
+// Fix A1/A2: AuthGate receives auth state as props — no independent useInlineAuth call
+interface AuthGateProps {
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
+  loading: boolean;
+  error: string;
+  registrationSuccess: boolean;
+}
+
+function AuthGate({ login, register, loading, error, registrationSuccess }: AuthGateProps) {
+  // Fix M5: extend mode to include 'forgot'
+  const [mode, setMode]           = useState<'login' | 'register' | 'forgot'>('login');
+  const [email, setEmail]         = useState('');
+  const [password, setPass]       = useState('');
+  const [name, setName]           = useState('');
+  const [forgotEmail, setForgotEmail]   = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError]     = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === 'login') await login(email, password);
-    else await register(email, password, name);
+    else if (mode === 'register') await register(email, password, name);
   };
 
-  // If already stored, skip the gate
-  useEffect(() => {
-    const stored = getAccessToken();
-    if (stored) onAuth(stored);
-  }, [onAuth]);
+  // Fix M5: forgot password handler — calls inline, no external navigation
+  const submitForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true); setForgotError(''); setForgotSuccess(false);
+    try {
+      const res  = await fetch(`${AUTH_BASE}/auth/forgot-password`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ clientId: AUTH_CLIENT_ID, email: forgotEmail }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error ?? 'Request failed');
+      setForgotSuccess(true);
+    } catch (e) {
+      setForgotError(e instanceof Error ? e.message : 'Request failed');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-[calc(100vh-3rem)] flex items-center justify-center p-6">
@@ -119,54 +167,92 @@ function AuthGate({ onAuth }: { onAuth: (token: string) => void }) {
           </div>
         </div>
 
-        <form onSubmit={submit} className="space-y-4">
-          {mode === 'register' && (
+        {/* Fix M5: forgot password mode */}
+        {mode === 'forgot' ? (
+          <div className="space-y-4">
+            {forgotSuccess ? (
+              <p className="text-sm text-green-400 text-center">Check your inbox for a reset link.</p>
+            ) : (
+              <form onSubmit={submitForgot} className="space-y-4">
+                <input
+                  type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)}
+                  placeholder="Your email address" required
+                  className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm outline-none focus:border-primary transition-colors"
+                />
+                {forgotError && <p className="text-xs text-red-400">{forgotError}</p>}
+                <button
+                  type="submit" disabled={forgotLoading}
+                  className="w-full py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {forgotLoading ? 'Sending…' : 'Send reset link'}
+                </button>
+              </form>
+            )}
+            <p className="text-center text-xs text-muted-foreground mt-2">
+              <button
+                onClick={() => { setMode('login'); setForgotEmail(''); setForgotError(''); setForgotSuccess(false); }}
+                className="text-primary hover:underline"
+              >
+                Back to sign in
+              </button>
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="space-y-4">
+            {mode === 'register' && (
+              <input
+                value={name} onChange={e => setName(e.target.value)}
+                placeholder="Your name" required
+                className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm outline-none focus:border-primary transition-colors"
+              />
+            )}
             <input
-              value={name} onChange={e => setName(e.target.value)}
-              placeholder="Your name" required
+              type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="Email" required
               className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm outline-none focus:border-primary transition-colors"
             />
-          )}
-          <input
-            type="email" value={email} onChange={e => setEmail(e.target.value)}
-            placeholder="Email" required
-            className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm outline-none focus:border-primary transition-colors"
-          />
-          <input
-            type="password" value={password} onChange={e => setPass(e.target.value)}
-            placeholder="Password" required minLength={8}
-            className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm outline-none focus:border-primary transition-colors"
-          />
-          {error && <p className="text-xs text-red-400">{error}</p>}
-          <button
-            type="submit" disabled={loading}
-            className="w-full py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
-          </button>
-          {mode === 'login' && (
-            <div className="text-center">
-              <a
-                href={FORGOT_PASSWORD_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-              >
-                Forgot password?
-              </a>
-            </div>
-          )}
-        </form>
+            <input
+              type="password" value={password} onChange={e => setPass(e.target.value)}
+              placeholder="Password" required minLength={8}
+              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm outline-none focus:border-primary transition-colors"
+            />
+            {/* Fix M4: registration success inline message */}
+            {registrationSuccess && (
+              <p className="text-xs text-green-400">Account created — signing you in…</p>
+            )}
+            {error && <p className="text-xs text-red-400">{error}</p>}
+            <button
+              type="submit" disabled={loading}
+              className="w-full py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+            </button>
+            {/* Fix M5: forgot password now toggles inline mode, no external navigation */}
+            {mode === 'login' && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setMode('forgot')}
+                  className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+          </form>
+        )}
 
-        <p className="text-center text-xs text-muted-foreground mt-4">
-          {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-          <button
-            onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-            className="text-primary hover:underline"
-          >
-            {mode === 'login' ? 'Register' : 'Sign in'}
-          </button>
-        </p>
+        {mode !== 'forgot' && (
+          <p className="text-center text-xs text-muted-foreground mt-4">
+            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+            <button
+              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+              className="text-primary hover:underline"
+            >
+              {mode === 'login' ? 'Register' : 'Sign in'}
+            </button>
+          </p>
+        )}
 
         <p className="text-center text-xs text-muted-foreground/50 mt-6">
           Secured by{' '}
@@ -182,8 +268,9 @@ function AuthGate({ onAuth }: { onAuth: (token: string) => void }) {
 // ─── Main App ─────────────────────────────────────────────
 
 export function TaskManagerApp() {
-  const { token, logout, error: authError } = useInlineAuth();
-  const { boards, loading: boardsLoading, createBoard, deleteBoard } = useBoards(token);
+  // Fix A1/A2: single useInlineAuth instance at the top level
+  const { token, loading: authLoading, error: authError, registrationSuccess, login, register, logout } = useInlineAuth();
+  const { boards, loading: boardsLoading, error: boardsError, createBoard, deleteBoard } = useBoards(token);
   const [activeBoardId, setActiveBoardId] = useState<number | null>(null);
   const [newBoardName, setNewBoardName]   = useState('');
   const [addingBoard, setAddingBoard]     = useState(false);
@@ -193,16 +280,30 @@ export function TaskManagerApp() {
     if (boards.length > 0 && !activeBoardId) setActiveBoardId(boards[0].id);
   }, [boards, activeBoardId]);
 
+  // Fix A3: listen for auth:expired event dispatched by authFetch and call logout
+  useEffect(() => {
+    const handler = () => logout();
+    window.addEventListener('auth:expired', handler);
+    return () => window.removeEventListener('auth:expired', handler);
+  }, [logout]);
+
   // Decode JWT for user profile
-  const profile = token ? decodeJwtPayload(token) : null;
+  const profile   = token ? decodeJwtPayload(token) : null;
   const userName  = profile?.name  ?? profile?.email?.split('@')[0] ?? 'User';
   const userEmail = profile?.email ?? '';
 
-  const handleAuth = useCallback((t: string) => {
-    sessionStorage.setItem('tm_token', t);
-  }, []);
-
-  if (!token) return <AuthGate onAuth={handleAuth} />;
+  // Fix A1/A2: render AuthGate with props from the single hook instance
+  if (!token) {
+    return (
+      <AuthGate
+        login={login}
+        register={register}
+        loading={authLoading}
+        error={authError}
+        registrationSuccess={registrationSuccess}
+      />
+    );
+  }
 
   const activeBoard = boards.find(b => b.id === activeBoardId);
 
@@ -232,6 +333,9 @@ export function TaskManagerApp() {
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 mb-2">Boards</p>
         {boardsLoading ? (
           <div className="px-2 text-sm text-muted-foreground">Loading...</div>
+        ) : boardsError ? (
+          // Fix A5: display board load error in the sidebar
+          <div className="px-2 text-xs text-red-400">{boardsError}</div>
         ) : boards.map(board => (
           <div
             key={board.id}
@@ -269,8 +373,10 @@ export function TaskManagerApp() {
                   if (b) setActiveBoardId(b.id);
                   setNewBoardName(''); setAddingBoard(false);
                 }
-                if (e.key === 'Escape') setAddingBoard(false);
+                if (e.key === 'Escape') { setAddingBoard(false); setNewBoardName(''); }
               }}
+              // Fix M3: cancel input on blur
+              onBlur={() => { setAddingBoard(false); setNewBoardName(''); }}
               placeholder="Board name..."
               className="w-full bg-background border border-primary/50 rounded-lg px-3 py-1.5 text-sm outline-none"
             />

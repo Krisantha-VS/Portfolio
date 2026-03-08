@@ -1,4 +1,4 @@
-import { AUTH_BASE } from '@/shared/config';
+import { AUTH_BASE, AUTH_CLIENT_ID } from '@/shared/config';
 
 const TOKEN_KEY   = 'tm_token';
 const REFRESH_KEY = 'tm_refresh';
@@ -25,7 +25,7 @@ export function clearTokens() {
 
 // ─── Refresh ──────────────────────────────────────────────
 
-async function refreshAccessToken(): Promise<string | null> {
+export async function refreshAccessToken(): Promise<string | null> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return null;
 
@@ -33,15 +33,24 @@ async function refreshAccessToken(): Promise<string | null> {
     const res  = await fetch(`${AUTH_BASE}/auth/refresh`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ refreshToken }),
+      // Fix A4: include clientId in refresh body
+      body:    JSON.stringify({ refreshToken, clientId: AUTH_CLIENT_ID }),
     });
     const json = await res.json();
-    if (!json.success) return null;
+
+    if (!res.ok || !json.success) {
+      // Fix A3: dispatch auth:expired before clearing tokens
+      window.dispatchEvent(new Event('auth:expired'));
+      clearTokens();
+      return null;
+    }
 
     const { accessToken, refreshToken: newRefresh } = json.data;
     storeTokens(accessToken, newRefresh ?? refreshToken);
     return accessToken;
   } catch {
+    window.dispatchEvent(new Event('auth:expired'));
+    clearTokens();
     return null;
   }
 }
@@ -67,8 +76,7 @@ export async function authFetch(
       headers.set('Authorization', `Bearer ${newToken}`);
       return fetch(url, { ...options, headers });
     }
-    // Refresh failed — clear tokens so the app redirects to login
-    clearTokens();
+    // refreshAccessToken already dispatched auth:expired and cleared tokens
   }
 
   return res;

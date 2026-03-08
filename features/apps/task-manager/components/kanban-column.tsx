@@ -13,16 +13,17 @@ interface Props {
   tasks: Task[];
   onDrop: (status: TaskStatus) => void;
   onDragStart: (e: React.DragEvent, task: Task) => void;
+  onDragEnd: () => void; // Fix K1: thread onDragEnd through
   draggingId: number | null;
   onDelete: (id: number) => void;
   onStatusChange: (id: number, status: TaskStatus) => void;
   onAddTask: (title: string, priority: Task['priority'], description: string) => void;
-  onEdit?: (task: Task) => void;
+  onEdit: (task: Task) => void; // Fix T3: required, not optional
 }
 
 export function KanbanColumn({
   status, label, colorClass, tasks,
-  onDrop, onDragStart, draggingId,
+  onDrop, onDragStart, onDragEnd, draggingId,
   onDelete, onStatusChange, onAddTask, onEdit,
 }: Props) {
   const [dragOver, setDragOver] = useState(false);
@@ -50,7 +51,10 @@ export function KanbanColumn({
         dragOver && 'bg-primary/5 border-primary/40'
       )}
       onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-      onDragLeave={() => setDragOver(false)}
+      // Fix K2: only clear dragOver when pointer truly leaves the column (not into a child)
+      onDragLeave={e => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver(false);
+      }}
       onDrop={handleDrop}
     >
       {/* Column header */}
@@ -61,16 +65,18 @@ export function KanbanColumn({
             {tasks.length}
           </span>
         </div>
+        {/* Fix AC1: aria-label on icon-only Plus button */}
         <button
           onClick={() => setAdding(true)}
+          aria-label={`Add task to ${label}`}
           className="text-muted-foreground hover:text-primary transition-colors"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Tasks */}
-      <div className="flex-1 p-3 space-y-2 overflow-y-auto max-h-[calc(100vh-280px)]">
+      {/* Tasks — Fix M2: remove hard-coded max-h, let column grow naturally */}
+      <div className="flex-1 p-3 space-y-2 overflow-y-auto">
         {tasks.map(task => (
           <TaskCard
             key={task.id}
@@ -79,9 +85,18 @@ export function KanbanColumn({
             onStatusChange={onStatusChange}
             isDragging={draggingId === task.id}
             onDragStart={onDragStart}
+            onDragEnd={onDragEnd} // Fix K1: pass through
             onEdit={onEdit}
           />
         ))}
+
+        {/* Fix M6: empty column drop target visual */}
+        {tasks.length === 0 && !adding && (
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/40 border-2 border-dashed border-border rounded-xl mx-1">
+            <p className="text-xs">No tasks yet</p>
+            <p className="text-xs">Drop here or click +</p>
+          </div>
+        )}
 
         {/* Add task inline form */}
         {adding ? (

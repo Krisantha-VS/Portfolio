@@ -11,20 +11,71 @@ interface Props {
   boardId: number;
 }
 
+// Fix K5: minimal toast type
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error';
+}
+
+let _toastId = 0;
+
 export function KanbanBoard({ token, boardId }: Props) {
   const { tasks, loading, error, createTask, updateTask, moveTask, deleteTask } = useTasks(token, boardId);
   const [draggingTask, setDraggingTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask]   = useState<Task | null>(null);
+
+  // Fix K5: toast state
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const addToast = (message: string, type: 'success' | 'error') => {
+    const id = ++_toastId;
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
 
   const handleDragStart = (e: React.DragEvent, task: Task) => {
     setDraggingTask(task);
     e.dataTransfer.effectAllowed = 'move';
   };
 
+  // Fix K1: clear dragging state when drag ends (ghost state fix)
+  const handleDragEnd = () => {
+    setDraggingTask(null);
+  };
+
   const handleDrop = async (status: TaskStatus) => {
     if (!draggingTask || draggingTask.status === status) return;
-    await moveTask(draggingTask.id, status);
+    const moving = draggingTask;
     setDraggingTask(null);
+    try {
+      await moveTask(moving.id, status);
+      // no success toast for move — it's visually self-evident
+    } catch (e) {
+      addToast(e instanceof Error ? e.message : 'Failed to move task', 'error');
+    }
+  };
+
+  // Fix K5: wrapped createTask with feedback
+  const handleAddTask = async (title: string, priority: Task['priority'], description: string) => {
+    try {
+      await createTask(title, priority, description);
+      addToast('Task created', 'success');
+    } catch (e) {
+      addToast(e instanceof Error ? e.message : 'Failed to create task', 'error');
+    }
+  };
+
+  // Fix K5: wrapped deleteTask with feedback
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteTask(id);
+      addToast('Task deleted', 'success');
+    } catch (e) {
+      addToast(e instanceof Error ? e.message : 'Failed to delete task', 'error');
+    }
   };
 
   if (loading) return (
@@ -50,12 +101,11 @@ export function KanbanBoard({ token, boardId }: Props) {
             tasks={tasks.filter(t => t.status === col.key)}
             onDrop={handleDrop}
             onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd} // Fix K1
             draggingId={draggingTask?.id ?? null}
-            onDelete={deleteTask}
+            onDelete={handleDelete} // Fix K5
             onStatusChange={moveTask}
-            onAddTask={(title, priority, description) =>
-              createTask(title, priority, description)
-            }
+            onAddTask={handleAddTask} // Fix K5
             onEdit={task => setEditingTask(task)}
           />
         ))}
@@ -68,6 +118,22 @@ export function KanbanBoard({ token, boardId }: Props) {
           onClose={() => setEditingTask(null)}
         />
       )}
+
+      {/* Fix K5: Toast stack */}
+      <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50 pointer-events-none">
+        {toasts.map(toast => (
+          <div
+            key={toast.id}
+            className={`glass rounded-lg px-4 py-2 text-sm border pointer-events-auto transition-all ${
+              toast.type === 'success'
+                ? 'border-green-500/50 text-green-400'
+                : 'border-red-500/50 text-red-400'
+            }`}
+          >
+            {toast.message}
+          </div>
+        ))}
+      </div>
     </>
   );
 }

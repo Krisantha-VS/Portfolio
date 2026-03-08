@@ -17,7 +17,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   position: number;
-  due_date?: string | null;
+  due_date: string | null; // Fix T2: required, nullable, not optional
   created_at: string;
   updated_at: string;
 }
