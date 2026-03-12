@@ -523,6 +523,54 @@ export const projects: Project[] = [
 
   // ── Open Source ───────────────────────────────────────────────────────────
   {
+    title: "TaskFlow",
+    description:
+      "Full-featured serverless kanban task manager built with Next.js 16, Neon Postgres, and Prisma 7. Extracted from a portfolio project into a standalone production app — covers the full spectrum from board management to sprint planning, real-time sync, and team collaboration via board sharing with email invites.",
+    technologies: [
+      "Next.js 16",
+      "TypeScript",
+      "Prisma 7",
+      "Neon Postgres",
+      "Tailwind CSS v4",
+      "Zod",
+    ],
+    highlights: [
+      "Sprint Planning",
+      "Real-time SSE Sync",
+      "Board Sharing & Invites",
+      "Export CSV / .ics",
+      "Analytics Dashboard",
+      "Subtask Dependencies",
+    ],
+    impact: "End-to-end serverless task management app with 24 API routes deployed on Vercel",
+    category: "Open Source",
+    link: "https://github.com/Krisantha-VS/TaskFlow",
+    period: "2025–Present",
+  },
+  {
+    title: "AuthSaaS",
+    description:
+      "Standalone JWT authentication service built as a reusable backend — register, login, refresh token, and logout flows with secure httpOnly cookies and bearer token support. Designed to be consumed by any frontend via a proxy rewrite pattern, keeping secrets server-side.",
+    technologies: [
+      "Next.js 16",
+      "TypeScript",
+      "Neon Postgres",
+      "Prisma",
+      "jose (JWT)",
+      "Tailwind CSS v4",
+    ],
+    highlights: [
+      "JWT Access + Refresh Tokens",
+      "Proxy Rewrite Pattern",
+      "Serverless Deployment",
+      "Multi-app Support",
+    ],
+    impact: "Reusable auth service shared across multiple apps with zero secret exposure to the client",
+    category: "Open Source",
+    link: "https://github.com/Krisantha-VS",
+    period: "2025–Present",
+  },
+  {
     title: "MAUI-Template-With-Tailwind",
     description:
       "Production-ready .NET 9 Blazor Hybrid starter template integrating Tailwind CSS v4 with no Node.js dependency. Solves a real friction point: there is no official zero-Node solution for .NET MAUI + Tailwind, so this template fills that gap directly.",
