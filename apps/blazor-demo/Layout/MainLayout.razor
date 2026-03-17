@@ -1,0 +1,75 @@
+@inherits LayoutComponentBase
+@inject AuthState Auth
+@inject TokenStore TokenStore
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+
+@if (!Auth.IsAuthenticated)
+{
+    <Pages.Login />
+}
+else
+{
+    <div class="shell">
+        <!-- Top bar -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <div class="icon">⚡</div>
+                <span>Blazor Showcase</span>
+            </div>
+            <span class="topbar-badge">WebAssembly</span>
+            <div class="topbar-spacer"></div>
+            <a class="topbar-back" href="javascript:history.back()">← Back</a>
+        </header>
+
+        <div class="app-body">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <span class="sidebar-label">Navigation</span>
+                <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+                    🏠 Dashboard
+                </NavLink>
+                <NavLink class="nav-item" href="notes">
+                    📝 Notes
+                </NavLink>
+                <NavLink class="nav-item" href="about">
+                    ℹ️ About
+                </NavLink>
+
+                <div style="flex:1"></div>
+
+                @if (Auth.User is not null)
+                {
+                    <div class="user-box">
+                        <div class="user-avatar">@Auth.User.Email[0].ToString().ToUpper()</div>
+                        <div class="user-info">
+                            <div style="font-size:0.8rem;font-weight:500">@(Auth.User.Name ?? "User")</div>
+                            <div class="user-email">@Auth.User.Email</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost btn-sm mt-1" @onclick="Logout">Sign out</button>
+                }
+            </nav>
+
+            <!-- Main -->
+            <main class="content">
+                @Body
+            </main>
+        </div>
+    </div>
+}
+
+@code {
+    private async Task Logout()
+    {
+        try
+        {
+            var refresh = await TokenStore.GetRefreshTokenAsync();
+            if (refresh is not null) await AuthService.LogoutAsync(refresh);
+        }
+        catch { /* best-effort */ }
+        await TokenStore.ClearAsync();
+        Auth.Clear();
+        Nav.NavigateTo("/");
+    }
+}

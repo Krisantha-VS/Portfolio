@@ -1,0 +1,87 @@
+@page "/dev/apps"
+@layout blazor_demo.Layout.DevLayout
+@inject TenantApiService Api
+
+<div class="page-header">
+    <h1>Applications</h1>
+    <p>All apps registered under your tenant account.</p>
+</div>
+
+@if (_loading)
+{
+    <div class="empty-state"><div class="spinner"></div></div>
+}
+else if (_error is not null)
+{
+    <div class="error-msg">@_error</div>
+}
+else if (_apps.Length == 0)
+{
+    <div class="empty-state">
+        <div class="empty-icon">📱</div>
+        <p>No apps yet. Create one from the AuthSaas web dashboard.</p>
+    </div>
+}
+else
+{
+    <div class="items-list">
+        @foreach (var app in _apps)
+        {
+            <div class="item-card">
+                <div class="item-card-header">
+                    <div class="item-title">
+                        @app.Name
+                        <span class="status-badge @(app.IsActive ? "active" : "inactive")">
+                            @(app.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </div>
+                    <span class="item-date">@app.CreatedAt.ToString("MMM d, yyyy")</span>
+                </div>
+                @if (app.Description is not null)
+                {
+                    <p class="item-desc">@app.Description</p>
+                }
+                <div class="item-meta">
+                    <div class="meta-row">
+                        <span class="meta-key">Client ID</span>
+                        <code class="meta-val">@app.ClientId</code>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-key">App ID</span>
+                        <code class="meta-val">@app.Id</code>
+                    </div>
+                    @if (app.AllowedOrigins.Length > 0)
+                    {
+                        <div class="meta-row">
+                            <span class="meta-key">Origins</span>
+                            <div class="tag-list">
+                                @foreach (var origin in app.AllowedOrigins)
+                                {
+                                    <span class="tag">@origin</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="item-actions">
+                    <a class="btn btn-sm btn-ghost" href="/dev/users?appId=@app.Id">Users</a>
+                    <a class="btn btn-sm btn-ghost" href="/dev/webhooks?appId=@app.Id">Webhooks</a>
+                    <a class="btn btn-sm btn-ghost" href="/dev/audit?appId=@app.Id">Audit Log</a>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private BlazorDemo.Models.TenantAppDto[] _apps = [];
+    private bool   _loading = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try   { _apps = await Api.GetAppsAsync(); }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+}

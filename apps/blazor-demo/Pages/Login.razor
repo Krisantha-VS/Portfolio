@@ -1,0 +1,104 @@
+@page "/login"
+@inject IAuthService AuthService
+@inject TokenStore    TokenStore
+@inject AuthState     Auth
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="icon">⚡</div>
+            <div>
+                <h1>Blazor Showcase</h1>
+                <p>C# running in your browser</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            @if (_mode == Mode.Register)
+            {
+                <input class="form-input" placeholder="Your name" @bind="_name" />
+            }
+            <input class="form-input" type="email" placeholder="Email" @bind="_email" />
+            <input class="form-input" type="password" placeholder="Password" @bind="_password" />
+
+            @if (_error is not null)
+            {
+                <p class="error-msg">@_error</p>
+            }
+
+            <button class="btn btn-primary" disabled="@_loading" @onclick="Submit">
+                @if (_loading) { <span class="spinner"></span> }
+                @(_mode == Mode.Login ? "Sign in" : "Create account")
+            </button>
+        </div>
+
+        <p class="text-center text-muted mt-2">
+            @(_mode == Mode.Login ? "No account? " : "Have an account? ")
+            <button class="link-btn" @onclick="ToggleMode">
+                @(_mode == Mode.Login ? "Register" : "Sign in")
+            </button>
+        </p>
+
+        <p class="text-center text-muted mt-3" style="font-size:0.7rem;opacity:0.5">
+            Secured by <a href="#">AuthSaas</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    private enum Mode { Login, Register }
+
+    private Mode   _mode     = Mode.Login;
+    private string _email    = "";
+    private string _password = "";
+    private string _name     = "";
+    private string? _error;
+    private bool   _loading;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        // Restore session from sessionStorage
+        var access  = await TokenStore.GetAccessTokenAsync();
+        var email   = await JS.InvokeAsync<string?>("sessionStorage.getItem", "bd_user_email");
+        if (access is not null && email is not null)
+        {
+            // Build a minimal session to restore state
+            Auth.SetSession(new AuthSaas.Client.AuthSession
+            {
+                User   = new AuthSaas.Client.AuthUser { Id = "", Email = email, Role = "user" },
+                Tokens = new AuthSaas.Client.AuthTokens { AccessToken = access, RefreshToken = "", ExpiresIn = 0 },
+            });
+            StateHasChanged();
+        }
+    }
+
+    private async Task Submit()
+    {
+        _loading = true; _error = null;
+        try
+        {
+            AuthSaas.Client.AuthSession session;
+            if (_mode == Mode.Login)
+                session = await AuthService.LoginAsync(new(_email, _password));
+            else
+                session = await AuthService.RegisterAsync(new(_email, _password, _name));
+
+            await TokenStore.SaveTokensAsync(session.Tokens.AccessToken, session.Tokens.RefreshToken);
+            await JS.InvokeVoidAsync("sessionStorage.setItem", "bd_user_email", session.User.Email);
+            Auth.SetSession(session);
+            Nav.NavigateTo("/");
+        }
+        catch (AuthSaas.Client.AuthSaasException ex) { _error = ex.Message; }
+        catch { _error = "Something went wrong. Try again."; }
+        finally { _loading = false; }
+    }
+
+    private void ToggleMode()
+    {
+        _mode  = _mode == Mode.Login ? Mode.Register : Mode.Login;
+        _error = null;
+    }
+}

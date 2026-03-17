@@ -1,0 +1,93 @@
+@page "/dev/dashboard"
+@layout blazor_demo.Layout.DevLayout
+@inject TenantApiService Api
+@inject TenantAuthState TenantAuth
+
+<div class="page-header">
+    <h1>Overview</h1>
+    <p>Your AuthSaas platform at a glance.</p>
+</div>
+
+@if (_loading)
+{
+    <div class="stats-grid">
+        @for (int i = 0; i < 4; i++)
+        {
+            <div class="stat-card skeleton"></div>
+        }
+    </div>
+}
+else if (_error is not null)
+{
+    <div class="error-msg">@_error</div>
+}
+else if (_stats is not null)
+{
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(168,85,247,0.12);color:#a855f7">📱</div>
+            <div class="stat-value">@_stats.TotalApps</div>
+            <div class="stat-label">Applications</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(34,197,94,0.12);color:#22c55e">👥</div>
+            <div class="stat-value">@_stats.TotalUsers</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6">⚡</div>
+            <div class="stat-value">@_stats.ActiveSessions</div>
+            <div class="stat-label">Active Sessions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b">📋</div>
+            <div class="stat-value">@_stats.TotalAuditLogs</div>
+            <div class="stat-label">Audit Events</div>
+        </div>
+    </div>
+}
+
+<!-- Quick links -->
+<div class="section-header mt-6">Quick actions</div>
+<div class="quick-links">
+    <a class="quick-link-card" href="/dev/apps">
+        <span class="quick-link-icon">📱</span>
+        <span>Manage Apps</span>
+    </a>
+    <a class="quick-link-card" href="/dev/users">
+        <span class="quick-link-icon">👥</span>
+        <span>View Users</span>
+    </a>
+    <a class="quick-link-card" href="/dev/webhooks">
+        <span class="quick-link-icon">🔗</span>
+        <span>Webhooks</span>
+    </a>
+    <a class="quick-link-card" href="/dev/audit">
+        <span class="quick-link-icon">📋</span>
+        <span>Audit Log</span>
+    </a>
+</div>
+
+<!-- Tenant info -->
+@if (TenantAuth.Session is not null)
+{
+    <div class="section-header mt-6">Tenant info</div>
+    <div class="info-card">
+        <div class="info-row"><span class="info-key">Name</span><span class="info-val">@TenantAuth.Session.Name</span></div>
+        <div class="info-row"><span class="info-key">Email</span><span class="info-val">@TenantAuth.Session.Email</span></div>
+        <div class="info-row"><span class="info-key">Tenant ID</span><span class="info-val mono">@TenantAuth.Session.TenantId</span></div>
+    </div>
+}
+
+@code {
+    private BlazorDemo.Models.DashboardStatsDto? _stats;
+    private bool   _loading = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try   { _stats = await Api.GetStatsAsync(); }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+}

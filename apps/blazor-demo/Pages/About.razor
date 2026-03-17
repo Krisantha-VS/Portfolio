@@ -1,0 +1,52 @@
+@page "/about"
+
+<div class="page-header">
+    <h1>About This App</h1>
+    <p>A real-world Blazor WebAssembly showcase built with enterprise C# patterns.</p>
+</div>
+
+<div class="about-grid">
+    <div class="about-card">
+        <h3>⚡ WebAssembly</h3>
+        <p>
+            Blazor WASM compiles C# to WebAssembly bytecode. The .NET runtime runs
+            directly in your browser — no Node.js, no transpilation, no JS framework.
+        </p>
+    </div>
+    <div class="about-card">
+        <h3>🔐 AuthSaas SDK</h3>
+        <p>
+            Authentication is handled by the <strong>AuthSaas.Client</strong> NuGet package —
+            the same C# SDK available for any .NET project. JWT tokens are stored in sessionStorage
+            via JS interop.
+        </p>
+    </div>
+    <div class="about-card">
+        <h3>🏗️ Clean Architecture</h3>
+        <p>
+            Services are injected via .NET's built-in DI container. Interfaces decouple
+            the domain from infrastructure — the same patterns used in production .NET backends.
+        </p>
+    </div>
+    <div class="about-card">
+        <h3>🐘 PHP + MySQL Backend</h3>
+        <p>
+            Data is persisted in MySQL on Apache shared hosting via a PHP REST API.
+            Requests are authenticated with Bearer tokens verified by the PHP JWT library.
+        </p>
+    </div>
+</div>
+
+<div class="card" style="margin-top:1rem">
+    <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.75rem">Tech Stack</h3>
+    <div class="tech-list">
+        <span class="tech-pill">Blazor WASM</span>
+        <span class="tech-pill">C# 13</span>
+        <span class="tech-pill">.NET 9</span>
+        <span class="tech-pill">AuthSaas.Client</span>
+        <span class="tech-pill">PHP 8</span>
+        <span class="tech-pill">MySQL</span>
+        <span class="tech-pill">PDO</span>
+        <span class="tech-pill">Apache</span>
+    </div>
+</div>

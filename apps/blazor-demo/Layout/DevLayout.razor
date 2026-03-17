@@ -1,0 +1,87 @@
+@inherits LayoutComponentBase
+@inject TenantAuthState TenantAuth
+@inject TenantTokenStore TenantTokenStore
+@inject NavigationManager Nav
+@implements IDisposable
+
+@if (!TenantAuth.IsAuthenticated)
+{
+    <Pages.Dev.DevLogin />
+}
+else
+{
+    <div class="shell">
+        <!-- Top bar -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <div class="icon">🔐</div>
+                <span>AuthSaas Dashboard</span>
+            </div>
+            <span class="topbar-badge" style="background:rgba(168,85,247,0.15);color:#a855f7;border-color:rgba(168,85,247,0.3)">Developer</span>
+            <div class="topbar-spacer"></div>
+            <a class="topbar-back" href="/dev/dashboard">← Back to demo</a>
+        </header>
+
+        <div class="app-body">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <span class="sidebar-label">Developer</span>
+                <NavLink class="nav-item" href="/dev/dashboard" Match="NavLinkMatch.All">
+                    📊 Overview
+                </NavLink>
+                <NavLink class="nav-item" href="/dev/apps">
+                    📱 Applications
+                </NavLink>
+                <NavLink class="nav-item" href="/dev/users">
+                    👥 Users
+                </NavLink>
+                <NavLink class="nav-item" href="/dev/webhooks">
+                    🔗 Webhooks
+                </NavLink>
+                <NavLink class="nav-item" href="/dev/audit">
+                    📋 Audit Log
+                </NavLink>
+
+                <div class="sidebar-divider"></div>
+
+                <span class="sidebar-label">User Demo</span>
+                <NavLink class="nav-item" href="/">
+                    ⚡ Blazor App
+                </NavLink>
+
+                <div style="flex:1"></div>
+
+                @if (TenantAuth.Session is not null)
+                {
+                    <div class="user-box">
+                        <div class="user-avatar" style="background:linear-gradient(135deg,#a855f7,#ec4899)">
+                            @TenantAuth.Session.Name[0..1].ToUpper()
+                        </div>
+                        <div class="user-info">
+                            <div style="font-size:0.8rem;font-weight:500">@TenantAuth.Session.Name</div>
+                            <div class="user-email">@TenantAuth.Session.Email</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost btn-sm mt-1" @onclick="Logout">Sign out</button>
+                }
+            </nav>
+
+            <!-- Main -->
+            <main class="content">
+                @Body
+            </main>
+        </div>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized() => TenantAuth.OnChange += StateHasChanged;
+    public void Dispose()                   => TenantAuth.OnChange -= StateHasChanged;
+
+    private async Task Logout()
+    {
+        await TenantTokenStore.ClearAsync();
+        TenantAuth.Clear();
+        Nav.NavigateTo("/dev");
+    }
+}

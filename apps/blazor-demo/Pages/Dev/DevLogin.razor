@@ -1,0 +1,105 @@
+@page "/dev"
+@page "/dev/login"
+@layout blazor_demo.Layout.DevLayout
+@inject TenantApiService Api
+@inject TenantAuthState TenantAuth
+@inject TenantTokenStore TokenStore
+@inject NavigationManager Nav
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="icon">🔐</div>
+            <div>
+                <h1>AuthSaas</h1>
+                <p>Developer Dashboard</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            @if (_mode == Mode.Register)
+            {
+                <input class="form-input" placeholder="Your name" @bind="_name" />
+            }
+            <input class="form-input" type="email" placeholder="Tenant email" @bind="_email" />
+            <input class="form-input" type="password" placeholder="Password" @bind="_password" />
+
+            @if (_error is not null)
+            {
+                <p class="error-msg">@_error</p>
+            }
+
+            <button class="btn btn-primary" disabled="@_loading" @onclick="Submit">
+                @if (_loading) { <span class="spinner"></span> }
+                @(_mode == Mode.Login ? "Sign in" : "Create tenant account")
+            </button>
+        </div>
+
+        <p class="text-center text-muted mt-2">
+            @(_mode == Mode.Login ? "No account? " : "Have an account? ")
+            <button class="link-btn" @onclick="ToggleMode">
+                @(_mode == Mode.Login ? "Register" : "Sign in")
+            </button>
+        </p>
+
+        <p class="text-center text-muted mt-3" style="font-size:0.7rem;opacity:0.5">
+            AuthSaas · Tenant management portal
+        </p>
+    </div>
+</div>
+
+@code {
+    private enum Mode { Login, Register }
+
+    private Mode   _mode     = Mode.Login;
+    private string _email    = "";
+    private string _password = "";
+    private string _name     = "";
+    private string? _error;
+    private bool   _loading;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        var restored = await TokenStore.TryRestoreAsync();
+        if (restored is not null)
+        {
+            TenantAuth.SetSession(restored);
+            Nav.NavigateTo("/dev/dashboard");
+        }
+    }
+
+    private async Task Submit()
+    {
+        _loading = true; _error = null;
+        try
+        {
+            var result = _mode == Mode.Login
+                ? await Api.LoginAsync(_email, _password)
+                : await Api.RegisterAsync(_name, _email, _password);
+
+            await TokenStore.SaveAsync(
+                result.Tokens.AccessToken,
+                result.Tokens.RefreshToken,
+                result.Tenant.Email,
+                result.Tenant.Name,
+                result.Tenant.Id
+            );
+
+            TenantAuth.SetSession(new TenantSession
+            {
+                AccessToken  = result.Tokens.AccessToken,
+                RefreshToken = result.Tokens.RefreshToken,
+                Email        = result.Tenant.Email,
+                Name         = result.Tenant.Name,
+                TenantId     = result.Tenant.Id,
+            });
+
+            Nav.NavigateTo("/dev/dashboard");
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private void ToggleMode() { _mode = _mode == Mode.Login ? Mode.Register : Mode.Login; _error = null; }
+}

@@ -1,0 +1,48 @@
+@page "/"
+@inject AuthState Auth
+
+<div class="page-header">
+    <h1>Welcome back, <span class="gradient-text">@(Auth.User?.Name ?? Auth.User?.Email ?? "User")</span></h1>
+    <p>This app runs entirely in C# via WebAssembly — no JavaScript framework.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value gradient-text">C#</div>
+        <div class="stat-label">Language</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value gradient-text">WASM</div>
+        <div class="stat-label">Runtime</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value gradient-text">.NET 9</div>
+        <div class="stat-label">Framework</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value gradient-text">0 JS</div>
+        <div class="stat-label">Frameworks</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem">Architecture</h3>
+    <p style="font-size:0.8rem;color:var(--muted);line-height:1.7">
+        This showcase uses <strong style="color:var(--text)">Clean Architecture</strong> with dependency injection,
+        interfaces, and service layers — the same patterns used in enterprise .NET applications.
+        The auth layer integrates the <strong style="color:var(--text)">AuthSaas C# SDK</strong>
+        (<code style="font-size:0.75rem;background:rgba(255,255,255,0.06);padding:0.1rem 0.3rem;border-radius:4px">AuthSaas.Client</code> on NuGet).
+    </p>
+    <div class="tech-list" style="margin-top:0.75rem">
+        <span class="tech-pill">Blazor WASM</span>
+        <span class="tech-pill">C# 13</span>
+        <span class="tech-pill">.NET 9</span>
+        <span class="tech-pill">AuthSaas SDK</span>
+        <span class="tech-pill">DI / Services</span>
+        <span class="tech-pill">PHP Backend</span>
+    </div>
+</div>
+
+<div style="margin-top:1rem">
+    <a href="notes" class="btn btn-ghost btn-sm">Go to Notes →</a>
+</div>

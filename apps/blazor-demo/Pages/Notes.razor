@@ -1,0 +1,85 @@
+@page "/notes"
+@inject NoteService NotesSvc
+
+<div class="page-header">
+    <h1>Notes</h1>
+    <p>Create and manage notes — stored in MySQL via PHP backend.</p>
+</div>
+
+<!-- Add note form -->
+<div class="add-note-form card" style="margin-bottom:1.5rem">
+    <div class="form-row">
+        <input class="form-input" placeholder="Title" @bind="_title" style="flex:1" />
+    </div>
+    <textarea class="form-textarea" placeholder="Write your note…" @bind="_body"></textarea>
+    @if (_addError is not null)
+    {
+        <p class="error-msg">@_addError</p>
+    }
+    <div>
+        <button class="btn btn-primary btn-sm" style="width:auto" disabled="@_adding" @onclick="AddNote">
+            @if (_adding) { <span class="spinner"></span> }
+            Add note
+        </button>
+    </div>
+</div>
+
+<!-- Notes list -->
+@if (_loading)
+{
+    <div class="empty-state"><div class="spinner"></div></div>
+}
+else if (_notes.Count == 0)
+{
+    <div class="empty-state">
+        <div class="empty-icon">📝</div>
+        <p>No notes yet. Create your first one above.</p>
+    </div>
+}
+else
+{
+    <div class="notes-grid">
+        @foreach (var note in _notes)
+        {
+            <div class="note-card">
+                <h3>@note.Title</h3>
+                <p>@note.Body</p>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span class="note-date">@note.CreatedAt.ToString("MMM d, yyyy")</span>
+                    <button class="btn btn-danger btn-sm" @onclick="() => DeleteNote(note.Id)">Delete</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<BlazorDemo.Models.Note> _notes = [];
+    private bool    _loading = true;
+    private bool    _adding;
+    private string  _title   = "";
+    private string  _body    = "";
+    private string? _addError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _notes   = await NotesSvc.GetNotesAsync();
+        _loading = false;
+    }
+
+    private async Task AddNote()
+    {
+        if (string.IsNullOrWhiteSpace(_title)) { _addError = "Title is required."; return; }
+        _adding = true; _addError = null;
+        var note = await NotesSvc.CreateNoteAsync(new(_title.Trim(), _body.Trim()));
+        if (note is not null) { _notes.Insert(0, note); _title = ""; _body = ""; }
+        else _addError = "Failed to save note.";
+        _adding = false;
+    }
+
+    private async Task DeleteNote(int id)
+    {
+        var ok = await NotesSvc.DeleteNoteAsync(id);
+        if (ok) _notes.RemoveAll(n => n.Id == id);
+    }
+}

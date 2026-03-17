@@ -1,0 +1,196 @@
+@page "/dev/webhooks"
+@layout blazor_demo.Layout.DevLayout
+@inject TenantApiService Api
+
+<div class="page-header">
+    <h1>Webhooks</h1>
+    <p>Receive real-time events from your AuthSaas apps.</p>
+</div>
+
+<!-- App selector -->
+@if (_apps.Length > 1)
+{
+    <div class="filter-bar">
+        <label class="filter-label">App</label>
+        <select class="form-select" @onchange="OnAppChanged">
+            @foreach (var a in _apps)
+            {
+                <option value="@a.Id" selected="@(a.Id == _appId)">@a.Name</option>
+            }
+        </select>
+    </div>
+}
+
+<!-- Create form -->
+<div class="card mb-4">
+    <div class="card-title">New webhook</div>
+    <input class="form-input" placeholder="https://your-server.com/webhook" @bind="_url" />
+    <div class="tag-list mt-2">
+        @foreach (var ev in _availableEvents)
+        {
+            var selected = _selectedEvents.Contains(ev);
+            <button class="tag @(selected ? "tag-selected" : "")" type="button" @onclick="() => ToggleEvent(ev)">
+                @ev
+            </button>
+        }
+    </div>
+    @if (_createError is not null) { <p class="error-msg">@_createError</p> }
+    <button class="btn btn-primary btn-sm mt-2" style="width:auto" disabled="@_creating" @onclick="CreateWebhook">
+        @if (_creating) { <span class="spinner"></span> }
+        Add webhook
+    </button>
+</div>
+
+@if (_loading)
+{
+    <div class="empty-state"><div class="spinner"></div></div>
+}
+else if (_webhooks.Length == 0)
+{
+    <div class="empty-state">
+        <div class="empty-icon">🔗</div>
+        <p>No webhooks yet.</p>
+    </div>
+}
+else
+{
+    <div class="items-list">
+        @foreach (var hook in _webhooks)
+        {
+            <div class="item-card">
+                <div class="item-card-header">
+                    <div class="item-title">
+                        <span class="dot @(hook.IsActive ? "dot-green" : "dot-grey")"></span>
+                        <code style="font-size:0.8rem">@hook.Url</code>
+                    </div>
+                    <span class="item-date">@hook.CreatedAt.ToString("MMM d, yyyy")</span>
+                </div>
+                <div class="tag-list mt-1">
+                    @foreach (var ev in hook.Events) { <span class="tag">@ev</span> }
+                </div>
+                <p style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem;font-family:monospace">
+                    secret: @hook.Secret
+                </p>
+                <div class="item-actions mt-1">
+                    <button class="btn btn-sm btn-ghost" @onclick="() => LoadDeliveries(hook)">
+                        Deliveries
+                    </button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteWebhook(hook)">
+                        Delete
+                    </button>
+                </div>
+
+                <!-- Inline deliveries -->
+                @if (_deliveryHookId == hook.Id)
+                {
+                    <div class="deliveries-panel">
+                        @if (_deliveriesLoading)
+                        {
+                            <div class="spinner" style="margin:1rem auto"></div>
+                        }
+                        else if (_deliveries.Length == 0)
+                        {
+                            <p style="color:var(--muted);font-size:0.8rem;padding:0.5rem">No deliveries yet.</p>
+                        }
+                        else
+                        {
+                            @foreach (var d in _deliveries)
+                            {
+                                <div class="delivery-row">
+                                    <span class="delivery-event">@d.Event</span>
+                                    <span class="delivery-status @(d.Status >= 200 && d.Status < 300 ? "ok" : "fail")">
+                                        @(d.Status == 0 ? "ERR" : d.Status.ToString())
+                                    </span>
+                                    <span style="color:var(--muted);font-size:0.72rem">
+                                        @d.CreatedAt.ToString("HH:mm:ss")
+                                    </span>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "appId")] public string? QueryAppId { get; set; }
+
+    private BlazorDemo.Models.TenantAppDto[]    _apps            = [];
+    private BlazorDemo.Models.WebhookDto[]       _webhooks        = [];
+    private BlazorDemo.Models.WebhookDeliveryDto[] _deliveries    = [];
+    private string[]  _availableEvents  = [];
+    private HashSet<string> _selectedEvents = [];
+    private string  _appId           = "";
+    private string  _url             = "";
+    private string? _createError;
+    private string? _deliveryHookId;
+    private bool    _loading         = true;
+    private bool    _creating;
+    private bool    _deliveriesLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _apps  = await Api.GetAppsAsync();
+            _appId = QueryAppId ?? (_apps.Length > 0 ? _apps[0].Id : "");
+            if (_appId != "") await LoadWebhooks();
+        }
+        catch (Exception ex) { _loading = false; }
+        finally { _loading = false; }
+    }
+
+    private async Task OnAppChanged(ChangeEventArgs e)
+    {
+        _appId   = e.Value?.ToString() ?? "";
+        _loading = true;
+        await LoadWebhooks();
+        _loading = false;
+    }
+
+    private async Task LoadWebhooks()
+    {
+        if (_appId == "") return;
+        var (hooks, events) = await Api.GetWebhooksAsync(_appId);
+        _webhooks        = hooks;
+        _availableEvents = events;
+    }
+
+    private void ToggleEvent(string ev)
+    {
+        if (!_selectedEvents.Remove(ev)) _selectedEvents.Add(ev);
+    }
+
+    private async Task CreateWebhook()
+    {
+        _createError = null;
+        if (string.IsNullOrWhiteSpace(_url))    { _createError = "URL is required"; return; }
+        if (_selectedEvents.Count == 0)          { _createError = "Select at least one event"; return; }
+        _creating = true;
+        try
+        {
+            var hook = await Api.CreateWebhookAsync(_appId, _url, [.. _selectedEvents]);
+            _webhooks = [hook, .. _webhooks];
+            _url = ""; _selectedEvents.Clear();
+        }
+        catch (Exception ex) { _createError = ex.Message; }
+        finally { _creating = false; }
+    }
+
+    private async Task DeleteWebhook(BlazorDemo.Models.WebhookDto hook)
+    {
+        await Api.DeleteWebhookAsync(hook.Id, _appId);
+        _webhooks = _webhooks.Where(h => h.Id != hook.Id).ToArray();
+    }
+
+    private async Task LoadDeliveries(BlazorDemo.Models.WebhookDto hook)
+    {
+        if (_deliveryHookId == hook.Id) { _deliveryHookId = null; return; }
+        _deliveryHookId    = hook.Id;
+        _deliveriesLoading = true;
+        _deliveries        = await Api.GetDeliveriesAsync(hook.Id, _appId);
+        _deliveriesLoading = false;
+    }
+}

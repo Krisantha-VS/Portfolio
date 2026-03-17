@@ -1,0 +1,105 @@
+@page "/dev/audit"
+@layout blazor_demo.Layout.DevLayout
+@inject TenantApiService Api
+
+<div class="page-header">
+    <h1>Audit Log</h1>
+    <p>Every auth event across your platform.</p>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+    @if (_apps.Length > 0)
+    {
+        <label class="filter-label">App</label>
+        <select class="form-select" @onchange="OnFilterChanged">
+            <option value="">All apps</option>
+            @foreach (var a in _apps)
+            {
+                <option value="@a.Id" selected="@(a.Id == _appId)">@a.Name</option>
+            }
+        </select>
+    }
+    <button class="btn btn-sm btn-ghost" @onclick="Reload">Refresh</button>
+</div>
+
+@if (_loading)
+{
+    <div class="empty-state"><div class="spinner"></div></div>
+}
+else if (_error is not null)
+{
+    <div class="error-msg">@_error</div>
+}
+else if (_page is null || _page.Logs.Length == 0)
+{
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>No audit events yet.</p>
+    </div>
+}
+else
+{
+    <div class="audit-table">
+        <div class="audit-header">
+            <span>Time</span>
+            <span>Action</span>
+            <span>Resource</span>
+            <span>IP</span>
+        </div>
+        @foreach (var log in _page.Logs)
+        {
+            <div class="audit-row">
+                <span class="audit-time">@log.CreatedAt.ToString("MMM d HH:mm:ss")</span>
+                <span class="audit-action">@log.Action</span>
+                <span class="audit-resource">@log.Resource</span>
+                <span class="audit-ip">@(log.IpAddress ?? "—")</span>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (_page.Pages > 1)
+    {
+        <div class="pagination">
+            <button class="btn btn-sm btn-ghost" disabled="@(_currentPage <= 1)" @onclick="PrevPage">← Prev</button>
+            <span style="color:var(--muted);font-size:0.8rem">Page @_currentPage of @_page.Pages (@_page.Total total)</span>
+            <button class="btn btn-sm btn-ghost" disabled="@(_currentPage >= _page.Pages)" @onclick="NextPage">Next →</button>
+        </div>
+    }
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "appId")] public string? QueryAppId { get; set; }
+
+    private BlazorDemo.Models.TenantAppDto[] _apps = [];
+    private BlazorDemo.Models.AuditPageDto?  _page;
+    private string  _appId       = "";
+    private int     _currentPage = 1;
+    private bool    _loading     = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _apps  = await Api.GetAppsAsync();
+            _appId = QueryAppId ?? "";
+            await LoadLogs();
+        }
+        catch (Exception ex) { _error = ex.Message; _loading = false; }
+    }
+
+    private async Task LoadLogs()
+    {
+        _loading = true; _error = null;
+        try   { _page = await Api.GetAuditLogsAsync(_appId == "" ? null : _appId, _currentPage); }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private Task OnFilterChanged(ChangeEventArgs e) { _appId = e.Value?.ToString() ?? ""; _currentPage = 1; return LoadLogs(); }
+    private Task Reload()   { _currentPage = 1; return LoadLogs(); }
+    private Task PrevPage() { if (_currentPage > 1) _currentPage--; return LoadLogs(); }
+    private Task NextPage() { _currentPage++; return LoadLogs(); }
+}
